@@ -1,0 +1,88 @@
+﻿
+<div class="card">
+
+    <div class="card-header">
+        <div class="row">
+            <div class="col-12 d-flex align-items-end justify-content-between">
+                <h4 class="float-left heading h4-responsive mb-0">Ejemplo Select2</h4>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row">
+
+            <div class="col-12 col-md-6">
+                <div class="form-group">
+                    <label>Ejemplo</label>
+
+                    <select id="select2_ejemplo" class="form-control"
+                            style="width: 100%;" tabindex="-1" aria-hidden="true">
+                    </select>
+                </div>
+            </div>
+            <div class="col-12 col-md-6">
+                <br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
+                <br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<script>
+
+    $("#select2_ejemplo").select2({
+        allowClear: true,
+        closeOnSelect: false,  // No lo cierra al seleccionar un option
+        multiple: true,
+        placeholder: "Seleccione",
+        //minimumInputLength: 3,  // Minimo de caracteres para busquedas
+        ajax: {
+            type: "POST",
+            url: "@Url.Action("ObtenerDatosSelect2", "Select2")",
+            delay: 700,     // Esperar antes de enviar la petición
+            // beforeSend: () => showLoading(),
+            // complete: () => hideLoading(),
+            // error: () => alert("Se encontró un error"),
+            data: (params) =>
+            {
+                var query = {
+                    search: params.term,
+                    pageSize: 10,
+                    page: params.page || 1
+                }
+
+                return query;
+            },
+            transport: function (params, success, failure)
+            {
+                // if (params.data != null && params.data.search != null && typeof(params.data.search) != "undefined")
+                // {
+                //   if (params.data.search.length > 20)  // Si el input de búsqueda tiene más de 20 caracteres
+                //     return false;
+                // }
+
+                var $request = $.ajax(params);
+                $request.then(success);
+                $request.fail(failure);
+
+                return $request;
+            },
+            processResults: (res) =>
+            {
+                return {
+                    results: res.resultados,
+                    pagination: {
+                        more: res.traerMasRegistros
+                    }
+                };
+            }
+        }
+    })
+    .on("select2:open", () => {
+        $(".select2-search__field").attr("maxlength", 20);  // El input de búsqueda acepta máximo 20 caracteres
+    });
+
+</script>
+
