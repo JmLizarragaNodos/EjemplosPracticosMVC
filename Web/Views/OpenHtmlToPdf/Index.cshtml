@@ -146,6 +146,8 @@
         </table>
         `;
 
+        contenidoPDF = htmlEncoder(contenidoPDF);  // Encripta el html string, para que así el MVC lo reciba
+
         let nombreArchivo = "PRUEBA_HOY";
 
         console.log("Inicia la descarga del PDF");
@@ -195,6 +197,14 @@
         .finally(() => {
             console.log("Terminó la descarga del PDF")
         });
+    }
+
+    function htmlEncoder(cadena)
+    {
+        cadena = cadena.replace(/&/g, '|amp;');  // Reeemplazar el &
+        cadena = cadena.replace(/</g, '|lt;');
+        cadena = cadena.replace(/>/g, '|gt;');
+        return cadena;
     }
 
 </script>
