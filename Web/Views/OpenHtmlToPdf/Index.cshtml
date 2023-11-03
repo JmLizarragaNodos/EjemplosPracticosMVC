@@ -1,0 +1,200 @@
+﻿
+<div class="container mt-4">
+
+    <div class="card">
+        <div class="card-body">
+
+            <div class="row g-3">
+
+                <div class="col-md-4">
+                    <h4>OpenHtmlToPdf</h4> <br /><br />
+
+                    <button type="button" onclick="descargarPDF()" class="btn btn-primary">Descargar PDF</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<!--
+<style>
+    p { word-break: break-word; } /* Impedir textos enormes que desbordan la página */
+
+    /* ======================================================================== */
+    /* Organizar tablas en caso de que sobrepasen la página */
+
+    thead {
+        display: table-row-group;
+    }
+    tr {
+        page-break-before: always;
+        page-break-after: always;
+        page-break-inside: avoid;
+    }
+    table {
+        word-break: break-word;  /* Impedir que textos enormes dentro de la celda desbordan la página */
+    }
+    table td {
+        word-break: break-word;  /* Impedir que textos enormes dentro de la celda desbordan la página */
+        min-width: 80px;
+    }
+
+    /* ======================================================================== */
+
+    .encabezado {
+        page-break-inside: avoid !important;
+    }
+
+    .tabla-info {
+        /* table-layout: fixed; */
+        width:100%;
+        border-collapse: collapse;
+    }
+
+    .tabla-info th, td {
+        border: 1px solid rgb(104, 103, 103);
+    }
+
+    .tabla-info td {
+        padding: 5px;
+    }
+
+    .tabla-info th {
+        /* white-space: nowrap; */    /* Impide que haga un salto de linea  */
+        padding: 3px;
+    }
+
+    .tabla-info thead {
+        background-color: gray; color: white;
+    }
+
+    .sin-borde {
+        border:none !important;
+    }
+</style>
+
+<div id="contenidoPDF">
+
+    <br/><br />
+    <table class="tabla-info">
+        <thead>
+            <tr>
+                <th>Producto</th>
+                <th>Descripción</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>AAAAAA</td>
+                <td>BBBBBB</td>
+            </tr>
+        </tbody>
+    </table>
+
+</div>
+-->
+
+<script>
+
+    function descargarPDF()
+    {
+        //let contenidoPDF = document.querySelector("#contenidoPDF").innerHTML;
+
+        let arreglo = [
+            { producto: "Producto 0", descripcion: "Descripción 0" },
+            { producto: "Producto 1", descripcion: "Descripción 1" },
+            { producto: "Producto 2", descripcion: "Descripción 2" },
+            { producto: "Producto 3", descripcion: "Descripción 3" },
+            { producto: "Producto 4", descripcion: "Descripción 4" },
+            { producto: "Producto 5", descripcion: "Descripción 5" },
+            { producto: "Producto 6", descripcion: "Descripción 6" },
+            { producto: "Producto 7", descripcion: "Descripción 7" },
+            { producto: "Producto 8", descripcion: "Descripción 8" },
+            { producto: "Producto 9", descripcion: "Descripción 9" },
+            { producto: "Producto 10", descripcion: "Descripción 10" },
+            { producto: "Producto 11", descripcion: "Descripción 11" },
+            { producto: "Producto 12", descripcion: "Descripción 12" },
+            { producto: "Producto 13", descripcion: "Descripción 13" },
+            { producto: "Producto 14", descripcion: "Descripción 14" },
+            { producto: "Producto 15", descripcion: "Descripción 15" },
+            { producto: "Producto 16", descripcion: "Descripción 16" },
+            { producto: "Producto 17", descripcion: "Descripción 17" },
+            { producto: "Producto 18", descripcion: "Descripción 18" },
+            { producto: "Producto 19", descripcion: "Descripción 19" }
+        ];
+
+        let contenidoPDF = `
+        <br/><br />
+        <table class="tabla-info">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Descripción</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${arreglo.map(x => {
+                    return ` <tr>
+                        <td>${x.producto}</td>
+                        <td>${x.descripcion}</td>
+                    </tr>`;
+                })
+                .join("")}
+            </tbody>
+        </table>
+        `;
+
+        let nombreArchivo = "PRUEBA_HOY";
+
+        console.log("Inicia la descarga del PDF");
+
+        fetch("@Url.Action("DescargarPDF", "OpenHtmlToPdf")", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ contenidoPDF, nombreArchivo })
+        })
+        .then(res =>
+        {
+            if (!res.ok)
+                throw Error(res.statusText);
+
+            const header = res.headers.get("Content-Disposition");
+            const contentType = res.headers.get("content-type");
+
+            if (contentType && contentType.includes("json"))  // Si la respuesta es un error
+            {
+                res.json().then(data => mostrarErroresRespuestaBackend(data));
+                return null;
+            }
+
+            const parts = header.split(";");
+            filename = parts[1].split("=")[1].replaceAll("\"", "");
+            return res.blob();
+        })
+        .then(blob =>
+        {
+            if (blob != null)
+            {
+                filename = decodeURI(filename);   // Decodifica tildes
+
+                //console.log("El filename es:", filename);
+                filename = filename.replaceAll("+", " ");    // Reemplaza el signo + por un espacio
+
+                var url = window.URL.createObjectURL(blob);
+                var a = document.createElement("a");
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            }
+        })
+        .catch(() => alert("Se encontró un error al descargar el archivo"))
+        .finally(() => {
+            console.log("Terminó la descarga del PDF")
+        });
+    }
+
+</script>
