@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Web.Mvc;
 using Web.Dto;
@@ -52,5 +53,49 @@ namespace Web.Controllers
 
             return Json(retorno);
         }
+
+        [HttpPost]
+        public ActionResult ObtenerDatosSelect2_ORACLE(string search, int pageSize, int page)
+        {
+            int offset = (page - 1) * pageSize;   // Cálculo del offset
+
+            var sql = @"
+            SELECT * FROM 
+            (
+                SELECT tu_tabla.id, tu_tabla.nombre, ROWNUM AS rn
+                FROM tu_tabla
+                WHERE 
+                    UPPER(nombre) LIKE UPPER(COALESCE('%" + search + @"%', nombre)) AND
+                    ROWNUM <= (
+                        " + pageSize + @" -- registrosPorPagina 
+                        * 
+                        " + page + @"  -- numeroPagina
+                    )
+            )
+            WHERE rn >= (
+	            " + offset + @" -- offset 
+                + 
+                1
+            )
+            ";
+
+            DataTable dt = null;
+            // Ejecutar la consulta sql y el resultado ponerlo en el dt
+
+            int cantidadDatosCursor = dt.Rows.Count;
+            bool traerMasRegistros = (cantidadDatosCursor > 0 && pageSize == cantidadDatosCursor);
+            var retorno = new Select2(traerMasRegistros);
+
+            foreach (DataRow x in dt.Rows)
+            {
+                retorno.AgregarOption(
+                    x["id"].ToString(),
+                    x["ucl_nombre"].ToString()
+                );
+            }
+
+            return Json(retorno);
+        }
+
     }
 }
