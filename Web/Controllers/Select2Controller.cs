@@ -90,7 +90,7 @@ namespace Web.Controllers
             {
                 retorno.AgregarOption(
                     x["id"].ToString(),
-                    x["ucl_nombre"].ToString()
+                    x["nombre"].ToString()
                 );
             }
 
