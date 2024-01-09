@@ -1,0 +1,481 @@
+﻿@*<style>
+    .btn-sgte {
+        background-color: white;
+        border: none;
+        box-shadow: none !important;
+        color: #333;
+    }
+
+    .dark .btn-sgte {
+        background-color: transparent;
+        border: none;
+        box-shadow: none !important;
+        color: #fff;
+    }
+
+    .radio-ch .form-check {
+        padding-left: 10px;
+    }
+
+        .radio-ch .form-check .form-check-labe {
+            padding-left: 25px;
+        }
+
+    .externo .md-form {
+        margin-top: 0;
+    }
+
+    .select-chosen-custom .chosen-choices {
+        border: none;
+        border-bottom: 1px solid #ced4da;
+        background-image: none;
+    }
+
+    .chosen-container-active .chosen-choices {
+        box-shadow: none;
+    }
+
+    .select-chosen-custom .chosen-container-multi .chosen-choices li.search-choice {
+        background-color: #555;
+        background-image: none;
+        color: #fff;
+        border-radius: 30px;
+        border: none;
+        font-size: 1rem;
+        padding: 0.5rem 2rem 0.5rem 1rem;
+    }
+
+        .select-chosen-custom .chosen-container-multi .chosen-choices li.search-choice .search-choice-close {
+            top: 8px;
+            right: 5px;
+        }
+
+    .select-chosen-custom .chosen-container-multi .chosen-choices li .chosen-search-input[type="text"] {
+        font-size: normal;
+        font-family: "Roboto Condensed";
+        color: #333;
+        margin: 0;
+        padding: 0;
+    }
+
+    .global {
+        height: 225px;
+        /* width: 200px; */
+        border-right: 2px solid #ddd;
+        background: #f1f1f1;
+        overflow-y: scroll;
+    }
+
+    .mensajes {
+        height: auto;
+    }
+
+    .texto {
+        padding: 4px;
+        background: #fff;
+    }
+
+    .dark .texto {
+        padding: 4px;
+        background: #383838;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .note {
+        font-size: 14px;
+        color: #999;
+        font-style: italic;
+    }
+
+    label.error {
+        position: relative;
+        color: #c00 !important;
+        font-size: 80%;
+        transform: none !important;
+    }
+
+    label.count {
+        right: 0;
+        left: auto;
+        top: -20px;
+        font-size: 85%;
+        transform: none !important;
+    }
+
+        label.count.count-error {
+            color: #c00 !important;
+        }
+
+    .form-control.error {
+        box-shadow: none !important;
+        border-bottom-color: #c00 !important;
+    }
+</style>*@
+
+<div class="page-content">
+
+    <div class="navbar-overlay"></div>
+
+    <div id="menuContent">
+
+        <!-- Loading Overlay -->
+        <div class="loading-backdrop" id="loadingOverlay">
+            <div class="loading-circle">
+                <div class="preloader-wrapper big active"><div class="spinner-layer spinner-white-only"><div class="circle-clipper left"><div class="circle"></div></div><div class="gap-patch"><div class="circle"></div></div><div class="circle-clipper right"><div class="circle"></div></div></div></div>
+            </div>
+        </div>
+    </div>
+
+    <main class="container">
+
+        <section>
+
+            <div class="card">
+
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col-12 d-flex align-items-end justify-content-between">
+                            <h4 class="float-left heading h4-responsive mb-0">Probando</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+
+                    <div class="row mb-4 mt2 info">
+                        <div class="col-md-4 mb-4">
+                            <div class=""><strong>Regiones</strong></div>
+                            <div class="md-form">
+                                <input placeholder="Buscar" type="search" id="form-autocomplete" class="form-control mdb-autocomplete"><ul class="mdb-autocomplete-wrap"></ul>
+                                <button class="mdb-autocomplete-clear">
+                                    <i class="material-icons">close</i>
+                                </button>
+                            </div>
+
+                            <div class="global mt-2">
+                                <div id="probandoAreasAcademicas" class="mensajes">
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div id="area-academica-1" class="col-md-4 mb-4">
+                            <div class=""><strong>Provincias</strong></div>
+                            <div class="md-form">
+                                <input placeholder="Buscar" type="search" id="form-autocomplete" class="form-control mdb-autocomplete">
+                                <button class="mdb-autocomplete-clear">
+                                    <i class="material-icons">close</i>
+                                </button>
+                            </div>
+                            <div class="global mt-2">
+                                <div id="probandoProgramasEstudio" class="mensajes">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="area-academica-2" class="col-md-4 mb-4" style="display: block;">
+                            <div class=""><strong>Comunas</strong></div>
+                            <div class="md-form">
+                                <input placeholder="Buscar" type="search" id="form-autocomplete" class="form-control mdb-autocomplete">
+                                <button class="mdb-autocomplete-clear">
+                                    <i class="material-icons">close</i>
+                                </button>
+                            </div>
+                            <div class="global mt-2">
+                                <div id="probandoAsignaturas" class="mensajes">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="card-footer">
+                    <div class="row py-2 flex-row">
+
+                        <div class="col col-md-6  d-flex justify-content-start">
+
+                        </div>
+                        <div class="col col-md-6 d-flex justify-content-end">
+
+                            <button type="button" class="btn btn-outline waves-effect waves-light">
+                                <span>No hace nada</span>
+                            </button>
+
+                            <button type="button" class="btn btn-default waves-effect waves-light">
+                                <span>No hace nada</span>
+                            </button>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+
+        </section>
+
+    </main>
+
+</div>
+
+<script src="https://www.inacap.cl/web/template-aplicaciones/js/jquery-3.3.1.min.js"></script>
+<script src="https://www.inacap.cl/web/template-aplicaciones/js/popper.min.js"></script>
+<script src="https://www.inacap.cl/web/template-aplicaciones/js/bootstrap.min.js"></script>
+<script src="https://www.inacap.cl/web/template-aplicaciones/js/mdb.min.js"></script>
+<script src="http://www.inacap.cl/web/template-aplicaciones/js/chosen.jquery.js"></script>
+<script src="https://www.inacap.cl/web/template-aplicaciones/js/datepicker.js"></script>
+<script src="http://www.inacap.cl/web/template-aplicaciones/js/datatables.min.js"></script>
+
+<script>
+
+        const urlBackend = "https://localhost:44375";
+
+        (async () =>
+        {
+            showLoading();
+
+            try {
+                let res = await obtenerDatos({
+                    url: `https://localhost:44353/EjemploCheckbox/ObtenerRegiones`,
+                    queryString: null
+                });
+
+                llenarElementoAreaAcademica({ querySelector: "#probandoAreasAcademicas", arreglo: res });
+            }
+            catch (ex) {
+                console.log(ex);
+            }
+            finally { hideLoading() }
+        })();
+
+        function llenarElementoAreaAcademica(datos)
+        {
+            document.querySelector(datos.querySelector).innerHTML = `
+            <div id="${datos.querySelector}" class="mensajes">
+                <fieldset class="form-check texto">
+                    <input class="form-check-input seleccionar-todo" type="checkbox" onchange="marcarTodoAreaAcademica(event)"
+                    id="checkbox-all-area-academica">
+
+                    <label class="form-check-label" for="checkbox-all-area-academica">Seleccionar todos</label>
+                </fieldset>
+
+                ${datos.arreglo.map(x =>
+                {
+                    return `<fieldset class="form-check texto">
+                        <input class="form-check-input" type="checkbox" value="${x.codigo}"
+                        onchange="seleccionarAreaAcademica('${x.codigo}')" id="checkbox-area-academica-${x.codigo}">
+
+                        <label class="form-check-label" for="checkbox-area-academica-${x.codigo}">${x.descripcion}</label>
+                    </fieldset>`;
+                })
+                .join("")}
+            </div>
+            `;
+        }
+
+        function llenarElementoProgramasEstudio(datos)
+        {
+            document.querySelector(datos.querySelector).innerHTML = `
+            <div id="${datos.querySelector}" class="mensajes">
+                <fieldset class="form-check texto">
+                    <input class="form-check-input seleccionar-todo" type="checkbox" onchange="marcarTodoProgramasEstudio(event)"
+                    id="checkbox-all-programa-estudio">
+
+                    <label class="form-check-label" for="checkbox-all-programa-estudio">Seleccionar todos</label>
+                </fieldset>
+
+                ${datos.arreglo.map(x =>
+                {
+                    return `<fieldset class="form-check texto">
+                        <input class="form-check-input" type="checkbox" value="${x.codigo}"
+                        onchange="seleccionarProgramaEstudio('${x.codigo}')" id="checkbox-programa-estudio-${x.codigo}">
+
+                        <label class="form-check-label" for="checkbox-programa-estudio-${x.codigo}">${x.descripcion}</label>
+                    </fieldset>`;
+                })
+                .join("")}
+            </div>
+            `;
+        }
+
+        function llenarElementoAsignaturas(datos)
+        {
+            document.querySelector(datos.querySelector).innerHTML = `
+            <div id="${datos.querySelector}" class="mensajes">
+                <fieldset class="form-check texto">
+                    <input class="form-check-input seleccionar-todo" type="checkbox" onchange="marcarTodoAsignaturas(event)"
+                    id="checkbox-all-asignatura">
+
+                    <label class="form-check-label" for="checkbox-all-asignatura">Seleccionar todos</label>
+                </fieldset>
+
+                ${datos.arreglo.map(x =>
+                {
+                    return `<fieldset class="form-check texto">
+                        <input class="form-check-input" type="checkbox" value="${x.codigo}"
+                        onchange="seleccionarAsignaturas('${x.codigo}')" id="checkbox-asignatura-${x.codigo}">
+
+                        <label class="form-check-label" for="checkbox-asignatura-${x.codigo}">${x.descripcion}</label>
+                    </fieldset>`;
+                })
+                .join("")}
+            </div>
+            `;
+        }
+
+        function marcarTodoProgramasEstudio(evento) {
+            let estaMarcado = evento.target.checked;
+            let checkboxes = document.querySelectorAll(`#probandoProgramasEstudio input[type="checkbox"]`);
+            checkboxes.forEach(checkbox => checkbox.checked = estaMarcado);
+            traerAsignaturas();
+        }
+
+        async function seleccionarProgramaEstudio(codigo)
+        {
+            let marcarTodo = Array.from(document.querySelectorAll(`#probandoProgramasEstudio input[type="checkbox"]:not(.seleccionar-todo)`)).every(x => x.checked);
+            document.querySelector("#checkbox-all-programa-estudio").checked = marcarTodo;
+
+            traerAsignaturas();
+        }
+
+        function obtenerValores(querySelector)  // obtenerValores("#probandoAreasAcademicas")
+        {
+            let checkboxSeleccionados = Array.from(document.querySelectorAll(`${querySelector} input[type="checkbox"]:not(.seleccionar-todo)`))
+                .filter(x => x.checked);
+
+            if (checkboxSeleccionados.length > 0)
+                return checkboxSeleccionados.map(x => x.value).join(",");
+
+            return null;
+        }
+
+        function marcarTodoAreaAcademica(evento)
+        {
+            let estaMarcado = evento.target.checked;
+            let checkboxes = document.querySelectorAll(`#probandoAreasAcademicas input[type="checkbox"]`);
+            checkboxes.forEach(checkbox => checkbox.checked = estaMarcado);
+            traerProgramasEstudio();
+        }
+
+        function marcarTodoAsignaturas(evento) {
+            let estaMarcado = evento.target.checked;
+            let checkboxes = document.querySelectorAll(`#probandoAsignaturas input[type="checkbox"]`);
+            checkboxes.forEach(checkbox => checkbox.checked = estaMarcado);
+            //traerAsignaturas();
+        }
+
+        async function seleccionarAreaAcademica(codigo)
+        {
+            let marcarTodo = Array.from(document.querySelectorAll(`#probandoAreasAcademicas input[type="checkbox"]:not(.seleccionar-todo)`)).every(x => x.checked);
+            document.querySelector("#checkbox-all-area-academica").checked = marcarTodo;
+
+            traerProgramasEstudio();
+        }
+
+        async function seleccionarAsignaturas(codigo) {
+            let marcarTodo = Array.from(document.querySelectorAll(`#probandoAsignaturas input[type="checkbox"]:not(.seleccionar-todo)`)).every(x => x.checked);
+            document.querySelector("#checkbox-all-asignatura").checked = marcarTodo;
+        }
+
+        async function traerProgramasEstudio()
+        {
+            limpiarElemento("#probandoProgramasEstudio");
+            limpiarElemento("#probandoAsignaturas");
+
+            let valores = obtenerValores("#probandoAreasAcademicas");
+
+            if (valores != null)
+            {
+                showLoading();
+
+                try {
+
+                    let programaEstudios = await obtenerDatos({
+                        //url: `${urlBackend}/Combobox/GetCboProgramaEstudios`,
+                        url: `https://localhost:44353/EjemploCheckbox/ObtenerProvincias`,
+                        queryString: "i_areas=" + valores
+                    });
+
+                    //console.log("programaEstudios", programaEstudios);
+                    llenarElementoProgramasEstudio({ querySelector: "#probandoProgramasEstudio", arreglo: programaEstudios });
+                }
+                catch (ex) {
+                    console.log(ex);
+                }
+                finally { hideLoading() }
+            }
+        }
+
+        async function traerAsignaturas()
+        {
+            limpiarElemento("#probandoAsignaturas");
+
+            let valores = obtenerValores("#probandoProgramasEstudio");
+            console.log(valores);
+
+            if (valores != null)
+            {
+                showLoading();
+
+                try {
+
+                    let res = await obtenerDatos({
+                        //url: `${urlBackend}/Combobox/GetAsignaturasSelect2`,
+                        url: `https://localhost:44353/EjemploCheckbox/ObtenerComunas`,
+                        queryString: "i_carr_ccod=" + valores
+                    });
+
+                    llenarElementoAsignaturas({ querySelector: "#probandoAsignaturas", arreglo: res });
+                }
+                catch (ex) {
+                    console.log(ex);
+                }
+                finally { hideLoading() }
+            }
+        }
+
+        //==========================================>>>>
+
+        function obtenerDatos(datos)
+        {
+            return new Promise((resolve, reject) =>
+            {
+                fetch(datos.url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: datos.queryString,
+                })
+                .then(response =>
+                {
+                    if (response.ok)
+                    {
+                        response.json().then(res =>
+                        {
+                            if (res.status == 200)
+                                resolve(res.objeto);
+                            else
+                                reject(res);
+                        });
+                    }
+                })
+                .catch(error => {
+                    reject("Ocurrió un error al obtener la información");
+                });
+            });
+        }
+
+        function showLoading() {
+            $('#loadingOverlay').show();
+        }
+
+        function hideLoading() {
+            $('#loadingOverlay').hide();
+        }
+
+        function limpiarElemento(querySelector) {
+            document.querySelector(querySelector).innerHTML = "";
+        }
+
+</script>
