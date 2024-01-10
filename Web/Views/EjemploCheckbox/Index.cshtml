@@ -42,7 +42,10 @@
                         <div class="col-md-4 mb-4">
                             <div class=""><strong>Regiones</strong></div>
                             <div class="md-form">
-                                <input placeholder="Buscar" type="search" id="form-autocomplete" class="form-control mdb-autocomplete"><ul class="mdb-autocomplete-wrap"></ul>
+                                <input placeholder="Buscar"
+                                oninput="buscarRegion(this)"
+                                type="search" class="form-control mdb-autocomplete">
+                                
                                 @*<button class="mdb-autocomplete-clear">
                                     <i class="material-icons">close</i>
                                 </button>*@
@@ -58,7 +61,10 @@
                         <div id="area-academica-1" class="col-md-4 mb-4">
                             <div class=""><strong>Provincias</strong></div>
                             <div class="md-form">
-                                <input placeholder="Buscar" type="search" id="form-autocomplete" class="form-control mdb-autocomplete">
+                                <input placeholder="Buscar" 
+                                oninput="buscarProvincia(this)"
+                                type="search" class="form-control mdb-autocomplete">
+
                                 @*<button class="mdb-autocomplete-clear">
                                     <i class="material-icons">close</i>
                                 </button>*@
@@ -72,7 +78,10 @@
                         <div id="area-academica-2" class="col-md-4 mb-4" style="display: block;">
                             <div class=""><strong>Comunas</strong></div>
                             <div class="md-form">
-                                <input placeholder="Buscar" type="search" id="form-autocomplete" class="form-control mdb-autocomplete">
+                                <input placeholder="Buscar" 
+                                oninput="buscarComuna(this)"       
+                                type="search" class="form-control mdb-autocomplete">
+
                                 @*<button class="mdb-autocomplete-clear">
                                     <i class="material-icons">close</i>
                                 </button>*@
@@ -141,17 +150,30 @@
 
     //#region Regiones
 
+    function buscarRegion(e)
+    {
+        let busqueda = e.value;
+        if (busqueda == "") busqueda = null;
+        llenarElementoRegiones({ querySelector: "#probandoRegiones", arreglo: arregloRegiones, busqueda });
+    }
+
     function llenarElementoRegiones(datos)
     {
+        if (datos.busqueda != null)
+            datos.arreglo = datos.arreglo.filter(x => x.descripcion.toLowerCase().includes(datos.busqueda.toLowerCase()));
+
         document.querySelector(datos.querySelector).innerHTML = `
         <div id="${datos.querySelector}" class="mensajes">
-            <fieldset class="form-check texto">
-                <input class="form-check-input seleccionar-todo" type="checkbox" onchange="marcarTodoRegiones(event)"
-                id="checkbox-all-area-academica">
 
-                <label class="form-check-label" for="checkbox-all-area-academica">Seleccionar todos</label>
-            </fieldset>
+            ${(datos.arreglo.length > 0 && datos.busqueda == null) ?
+                `<fieldset class="form-check texto">
+                    <input class="form-check-input seleccionar-todo" type="checkbox" onchange="marcarTodoRegiones(event)"
+                    id="checkbox-all-area-academica">
 
+                    <label class="form-check-label" for="checkbox-all-area-academica">Seleccionar todos</label>
+                </fieldset>`
+            : ""}
+            
             ${datos.arreglo.map(x =>
             {
                 return `<fieldset class="form-check texto">
@@ -172,9 +194,15 @@
         let elemento = arregloRegiones.find(x => x.codigo == codigo);
         elemento.estaSeleccionado = !elemento.estaSeleccionado;
 
-        let marcarTodo = arregloRegiones.every(x => x.estaSeleccionado);
-        //let marcarTodo = Array.from(document.querySelectorAll(`#probandoRegiones input[type="checkbox"]:not(.seleccionar-todo)`)).every(x => x.checked);
-        document.querySelector("#checkbox-all-area-academica").checked = marcarTodo;
+        let checkTodo = document.querySelector("#checkbox-all-area-academica");
+
+        if (checkTodo != null)
+        {
+            let marcarTodo = arregloRegiones.every(x => x.estaSeleccionado);
+            //let marcarTodo = Array.from(document.querySelectorAll(`#probandoRegiones input[type="checkbox"]:not(.seleccionar-todo)`)).every(x => x.checked);
+
+            checkTodo.checked = marcarTodo;
+        }
 
         traerProvincias();
     }
@@ -196,16 +224,29 @@
 
     //#region Provincias
 
+    function buscarProvincia(e)
+    {
+        let busqueda = e.value;
+        if (busqueda == "") busqueda = null;
+        llenarElementoProvincias({ querySelector: "#probandoProvincias", arreglo: arregloProvincias, busqueda });
+    }
+
     function llenarElementoProvincias(datos)
     {
+        if (datos.busqueda != null)
+            datos.arreglo = datos.arreglo.filter(x => x.descripcion.toLowerCase().includes(datos.busqueda.toLowerCase()));
+
         document.querySelector(datos.querySelector).innerHTML = `
         <div id="${datos.querySelector}" class="mensajes">
-            <fieldset class="form-check texto">
-                <input class="form-check-input seleccionar-todo" type="checkbox" onchange="marcarTodoProvincias(event)"
-                id="checkbox-all-programa-estudio">
 
-                <label class="form-check-label" for="checkbox-all-programa-estudio">Seleccionar todos</label>
-            </fieldset>
+            ${(datos.arreglo.length > 0 && datos.busqueda == null) ?
+                `<fieldset class="form-check texto">
+                    <input class="form-check-input seleccionar-todo" type="checkbox" onchange="marcarTodoProvincias(event)"
+                    id="checkbox-all-programa-estudio">
+
+                    <label class="form-check-label" for="checkbox-all-programa-estudio">Seleccionar todos</label>
+                </fieldset>`
+            : ""}
 
             ${datos.arreglo.map(x =>
             {
@@ -227,9 +268,15 @@
         let elemento = arregloProvincias.find(x => x.codigo == codigo);
         elemento.estaSeleccionado = !elemento.estaSeleccionado;
 
-        let marcarTodo = arregloProvincias.every(x => x.estaSeleccionado);
-        //let marcarTodo = Array.from(document.querySelectorAll(`#probandoProvincias input[type="checkbox"]:not(.seleccionar-todo)`)).every(x => x.checked);
-        document.querySelector("#checkbox-all-programa-estudio").checked = marcarTodo;
+        let checkTodo = document.querySelector("#checkbox-all-programa-estudio");
+
+        if (checkTodo != null)
+        {
+            let marcarTodo = arregloProvincias.every(x => x.estaSeleccionado);
+            //let marcarTodo = Array.from(document.querySelectorAll(`#probandoProvincias input[type="checkbox"]:not(.seleccionar-todo)`)).every(x => x.checked);
+
+            checkTodo.checked = marcarTodo;
+        }
 
         traerComunas();
     }
@@ -286,16 +333,29 @@
 
     //#region Comunas
 
+    function buscarComuna(e)
+    {
+        let busqueda = e.value;
+        if (busqueda == "") busqueda = null;
+        llenarElementoComunas({ querySelector: "#probandoComunas", arreglo: arregloComunas, busqueda });
+    }
+
     function llenarElementoComunas(datos)
     {
+        if (datos.busqueda != null)
+            datos.arreglo = datos.arreglo.filter(x => x.descripcion.toLowerCase().includes(datos.busqueda.toLowerCase()));
+
         document.querySelector(datos.querySelector).innerHTML = `
         <div id="${datos.querySelector}" class="mensajes">
-            <fieldset class="form-check texto">
-                <input class="form-check-input seleccionar-todo" type="checkbox" onchange="marcarTodoComunas(event)"
-                id="checkbox-all-asignatura">
 
-                <label class="form-check-label" for="checkbox-all-asignatura">Seleccionar todos</label>
-            </fieldset>
+            ${(datos.arreglo.length > 0 && datos.busqueda == null) ?
+                `<fieldset class="form-check texto">
+                    <input class="form-check-input seleccionar-todo" type="checkbox" onchange="marcarTodoComunas(event)"
+                    id="checkbox-all-asignatura">
+
+                    <label class="form-check-label" for="checkbox-all-asignatura">Seleccionar todos</label>
+                </fieldset>`
+                : ""}
 
             ${datos.arreglo.map(x =>
             {
@@ -317,9 +377,15 @@
         let elemento = arregloComunas.find(x => x.codigo == codigo);
         elemento.estaSeleccionado = !elemento.estaSeleccionado;
 
-        let marcarTodo = arregloComunas.every(x => x.estaSeleccionado);
-        //let marcarTodo = Array.from(document.querySelectorAll(`#probandoComunas input[type="checkbox"]:not(.seleccionar-todo)`)).every(x => x.checked);
-        document.querySelector("#checkbox-all-asignatura").checked = marcarTodo;
+        let checkTodo = document.querySelector("#checkbox-all-asignatura");
+
+        if (checkTodo != null)
+        {
+            let marcarTodo = arregloComunas.every(x => x.estaSeleccionado);
+            //let marcarTodo = Array.from(document.querySelectorAll(`#probandoComunas input[type="checkbox"]:not(.seleccionar-todo)`)).every(x => x.checked);
+
+            checkTodo.checked = marcarTodo;
+        }     
     }
 
     function marcarTodoComunas(evento)
