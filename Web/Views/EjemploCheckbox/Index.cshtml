@@ -116,17 +116,22 @@
 
 <script>
 
+    let arregloRegiones = [];
+    let arregloProvincias = [];
+    let arregloComunas = [];
+
     (async () =>
     {
         showLoading();
 
         try {
-            let res = await obtenerDatos({
+            arregloRegiones = await obtenerDatos({
                 url: `@Url.Action("ObtenerRegiones", "EjemploCheckbox")`,
                 queryString: null
             });
 
-            llenarElementoRegiones({ querySelector: "#probandoRegiones", arreglo: res });
+            llenarElementoRegiones({ querySelector: "#probandoRegiones", arreglo: arregloRegiones });
+            document.querySelector("#checkbox-all-area-academica").checked = arregloRegiones.every(x => x.estaSeleccionado);
         }
         catch (ex) {
             console.log(ex);
@@ -151,7 +156,8 @@
             {
                 return `<fieldset class="form-check texto">
                     <input class="form-check-input" type="checkbox" value="${x.codigo}"
-                    onchange="seleccionarRegion('${x.codigo}')" id="checkbox-area-academica-${x.codigo}">
+                    onchange="seleccionarRegion('${x.codigo}')" id="checkbox-area-academica-${x.codigo}"
+                    ${x.estaSeleccionado ? "checked" : ""}>
 
                     <label class="form-check-label" for="checkbox-area-academica-${x.codigo}">${x.descripcion}</label>
                 </fieldset>`;
@@ -163,7 +169,11 @@
 
     function seleccionarRegion(codigo)
     {
-        let marcarTodo = Array.from(document.querySelectorAll(`#probandoRegiones input[type="checkbox"]:not(.seleccionar-todo)`)).every(x => x.checked);
+        let elemento = arregloRegiones.find(x => x.codigo == codigo);
+        elemento.estaSeleccionado = !elemento.estaSeleccionado;
+
+        let marcarTodo = arregloRegiones.every(x => x.estaSeleccionado);
+        //let marcarTodo = Array.from(document.querySelectorAll(`#probandoRegiones input[type="checkbox"]:not(.seleccionar-todo)`)).every(x => x.checked);
         document.querySelector("#checkbox-all-area-academica").checked = marcarTodo;
 
         traerProvincias();
@@ -172,8 +182,13 @@
     function marcarTodoRegiones(evento)
     {
         let estaMarcado = evento.target.checked;
+
+        // Marca todos los elementos del arreglo en su atributo estaSeleccionado con el valor correspondiente
+        arregloRegiones = arregloRegiones.map(x => ({ ...x, estaSeleccionado: estaMarcado }));
+
         let checkboxes = document.querySelectorAll(`#probandoRegiones input[type="checkbox"]`);
         checkboxes.forEach(checkbox => checkbox.checked = estaMarcado);
+
         traerProvincias();
     }
 
@@ -196,7 +211,8 @@
             {
                 return `<fieldset class="form-check texto">
                     <input class="form-check-input" type="checkbox" value="${x.codigo}"
-                    onchange="seleccionarProvincia('${x.codigo}')" id="checkbox-programa-estudio-${x.codigo}">
+                    onchange="seleccionarProvincia('${x.codigo}')" id="checkbox-programa-estudio-${x.codigo}"
+                    ${x.estaSeleccionado ? "checked" : ""}>
 
                     <label class="form-check-label" for="checkbox-programa-estudio-${x.codigo}">${x.descripcion}</label>
                 </fieldset>`;
@@ -208,43 +224,61 @@
 
     function seleccionarProvincia(codigo)
     {
-        let marcarTodo = Array.from(document.querySelectorAll(`#probandoProvincias input[type="checkbox"]:not(.seleccionar-todo)`)).every(x => x.checked);
+        let elemento = arregloProvincias.find(x => x.codigo == codigo);
+        elemento.estaSeleccionado = !elemento.estaSeleccionado;
+
+        let marcarTodo = arregloProvincias.every(x => x.estaSeleccionado);
+        //let marcarTodo = Array.from(document.querySelectorAll(`#probandoProvincias input[type="checkbox"]:not(.seleccionar-todo)`)).every(x => x.checked);
         document.querySelector("#checkbox-all-programa-estudio").checked = marcarTodo;
 
         traerComunas();
     }
 
-    function marcarTodoProvincias(evento) {
+    function marcarTodoProvincias(evento)
+    {
         let estaMarcado = evento.target.checked;
+
+        // Marca todos los elementos del arreglo en su atributo estaSeleccionado con el valor correspondiente
+        arregloProvincias = arregloProvincias.map(x => ({ ...x, estaSeleccionado: estaMarcado }));
+
         let checkboxes = document.querySelectorAll(`#probandoProvincias input[type="checkbox"]`);
         checkboxes.forEach(checkbox => checkbox.checked = estaMarcado);
+
         traerComunas();
     }
 
     async function traerProvincias()
     {
+        arregloProvincias = [];
+        arregloComunas = [];
+
         limpiarElemento("#probandoProvincias");
         limpiarElemento("#probandoComunas");
 
-        let valores = obtenerValores("#probandoRegiones");
-
-        if (valores != null)
+        if (arregloRegiones.some(x => x.estaSeleccionado))
         {
-            showLoading();
+            //let valores = obtenerValores("#probandoRegiones");
+            let valores = arregloRegiones.filter(x => x.estaSeleccionado).map(x => x.codigo).join(",");
 
-            try {
+            if (valores != null)
+            {
+                showLoading();
 
-                let programaEstudios = await obtenerDatos({
-                    url: `@Url.Action("ObtenerProvincias", "EjemploCheckbox")`,
-                    queryString: `i_regiones=${valores}`
-                });
+                try {
 
-                llenarElementoProvincias({ querySelector: "#probandoProvincias", arreglo: programaEstudios });
+                    arregloProvincias = await obtenerDatos({
+                        url: `@Url.Action("ObtenerProvincias", "EjemploCheckbox")`,
+                        queryString: `i_regiones=${valores}`
+                    });
+
+                    llenarElementoProvincias({ querySelector: "#probandoProvincias", arreglo: arregloProvincias });
+                    document.querySelector("#checkbox-all-programa-estudio").checked = arregloProvincias.every(x => x.estaSeleccionado);
+                }
+                catch (ex) {
+                    console.log(ex);
+                }
+                finally { hideLoading() }
             }
-            catch (ex) {
-                console.log(ex);
-            }
-            finally { hideLoading() }
         }
     }
 
@@ -267,7 +301,8 @@
             {
                 return `<fieldset class="form-check texto">
                     <input class="form-check-input" type="checkbox" value="${x.codigo}"
-                    onchange="seleccionarComuna('${x.codigo}')" id="checkbox-asignatura-${x.codigo}">
+                    onchange="seleccionarComuna('${x.codigo}')" id="checkbox-asignatura-${x.codigo}"
+                    ${x.estaSeleccionado ? "checked" : ""}>
 
                     <label class="form-check-label" for="checkbox-asignatura-${x.codigo}">${x.descripcion}</label>
                 </fieldset>`;
@@ -279,41 +314,54 @@
 
     function seleccionarComuna(codigo)
     {
-        let marcarTodo = Array.from(document.querySelectorAll(`#probandoComunas input[type="checkbox"]:not(.seleccionar-todo)`)).every(x => x.checked);
+        let elemento = arregloComunas.find(x => x.codigo == codigo);
+        elemento.estaSeleccionado = !elemento.estaSeleccionado;
+
+        let marcarTodo = arregloComunas.every(x => x.estaSeleccionado);
+        //let marcarTodo = Array.from(document.querySelectorAll(`#probandoComunas input[type="checkbox"]:not(.seleccionar-todo)`)).every(x => x.checked);
         document.querySelector("#checkbox-all-asignatura").checked = marcarTodo;
     }
 
     function marcarTodoComunas(evento)
     {
         let estaMarcado = evento.target.checked;
+
+        // Marca todos los elementos del arreglo en su atributo estaSeleccionado con el valor correspondiente
+        arregloComunas = arregloComunas.map(x => ({ ...x, estaSeleccionado: estaMarcado }));
+
         let checkboxes = document.querySelectorAll(`#probandoComunas input[type="checkbox"]`);
         checkboxes.forEach(checkbox => checkbox.checked = estaMarcado);
     }
 
     async function traerComunas()
     {
+        arregloComunas = [];
         limpiarElemento("#probandoComunas");
 
-        let valores = obtenerValores("#probandoProvincias");
-        console.log(valores);
-
-        if (valores != null)
+        if (arregloProvincias.some(x => x.estaSeleccionado))
         {
-            showLoading();
+            //let valores = obtenerValores("#probandoProvincias");
+            let valores = arregloProvincias.filter(x => x.estaSeleccionado).map(x => x.codigo).join(",");
 
-            try {
+            if (valores != null)
+            {
+                showLoading();
 
-                let res = await obtenerDatos({
-                    url: `@Url.Action("ObtenerComunas", "EjemploCheckbox")`,
-                    queryString: `i_provincias=${valores}`
-                });
+                try {
 
-                llenarElementoComunas({ querySelector: "#probandoComunas", arreglo: res });
+                    arregloComunas = await obtenerDatos({
+                        url: `@Url.Action("ObtenerComunas", "EjemploCheckbox")`,
+                        queryString: `i_provincias=${valores}`
+                    });
+
+                    llenarElementoComunas({ querySelector: "#probandoComunas", arreglo: arregloComunas });
+                    document.querySelector("#checkbox-all-asignatura").checked = arregloComunas.every(x => x.estaSeleccionado);
+                }
+                catch (ex) {
+                    console.log(ex);
+                }
+                finally { hideLoading() }
             }
-            catch (ex) {
-                console.log(ex);
-            }
-            finally { hideLoading() }
         }
     }
 
@@ -321,16 +369,16 @@
 
     //==========================================>>>>
 
-    function obtenerValores(querySelector)
-    {
-        let checkboxSeleccionados = Array.from(document.querySelectorAll(`${querySelector} input[type="checkbox"]:not(.seleccionar-todo)`))
-            .filter(x => x.checked);
+    //function obtenerValores(querySelector)
+    //{
+    //    let checkboxSeleccionados = Array.from(document.querySelectorAll(`${querySelector} input[type="checkbox"]:not(.seleccionar-todo)`))
+    //        .filter(x => x.checked);
 
-        if (checkboxSeleccionados.length > 0)
-            return checkboxSeleccionados.map(x => x.value).join(",");
+    //    if (checkboxSeleccionados.length > 0)
+    //        return checkboxSeleccionados.map(x => x.value).join(",");
 
-        return null;
-    }
+    //    return null;
+    //}
 
     function obtenerDatos(datos)
     {

@@ -40,7 +40,8 @@ namespace Web.Controllers
             {
                 res.objeto = _regiones.Select(x => new { 
                     codigo = x.idRegion,
-                    descripcion = x.nombreRegion
+                    descripcion = x.nombreRegion,
+                    estaSeleccionado = false
                 }).ToList();
             }
             catch (Exception ex)
@@ -65,7 +66,8 @@ namespace Web.Controllers
                     .Select(provincia => new
                     {
                         codigo = provincia.idProvincia,
-                        descripcion = provincia.nombreProvincia
+                        descripcion = provincia.nombreProvincia,
+                        estaSeleccionado = false
                     })
                     .ToList();
 
@@ -94,7 +96,8 @@ namespace Web.Controllers
                     .Select(comuna => new
                     {
                         codigo = comuna.idComuna,
-                        descripcion = comuna.nombreComuna
+                        descripcion = comuna.nombreComuna,
+                        estaSeleccionado = false
                     })
                     .ToList();
 
