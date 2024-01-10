@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
+using Web.Dto;
 
 // https://localhost:44353/EjemploCheckbox
 
@@ -44,108 +45,67 @@ namespace Web.Controllers
             }
             catch (Exception ex)
             {
-                res.status = 500;
+                res.AgregarInternalServerError(ex.Message);
             }
 
             return Json(res);
         }
 
-        public ActionResult ObtenerProvincias(string i_areas)  // i_areas	"1,2"
+        public ActionResult ObtenerProvincias(string i_regiones)
         {
             var res = new RespuestaBackend();
 
             try
             {
-                List<object> retorno = new List<object>();
-                List<string> listaDeAreas = new List<string>(i_areas.Split(','));
+                List<string> codigosRegiones = new List<string>(i_regiones.Split(','));
 
-                List<Region> regionesSeleccionadas = _regiones.Where(x => listaDeAreas.Contains(x.idRegion.ToString()))
+                var provincias = _regiones
+                    .Where(region => codigosRegiones.Contains(region.idRegion.ToString()))
+                    .SelectMany(region => region.provincias)
+                    .Select(provincia => new
+                    {
+                        codigo = provincia.idProvincia,
+                        descripcion = provincia.nombreProvincia
+                    })
                     .ToList();
 
-                foreach (Region region in regionesSeleccionadas)
-                {
-                    foreach (Provincia provincia in region.provincias)
-                    {
-                        retorno.Add(new
-                        {
-                            codigo = provincia.idProvincia,
-                            descripcion = provincia.nombreProvincia
-                        });
-                    }
-                }
-
-                /*
-                List<object> retorno = new List<object>();
-                List<string> listaDeAreas = new List<string>(i_areas.Split(','));
-
-                foreach (string idRegion in listaDeAreas)
-                {
-                    Region region = _regiones.FirstOrDefault(x => x.idRegion == int.Parse(idRegion));
-
-                    if (region != null)
-                    {
-                        foreach (Provincia provincia in region.provincias)
-                        {
-                            retorno.Add(new
-                            {
-                                codigo = provincia.idProvincia,
-                                descripcion = provincia.nombreProvincia
-                            });
-                        }
-                    }
-                }
-                */
-                res.objeto = retorno;
+                res.objeto = provincias;
             }
             catch (Exception ex)
             {
-                res.status = 500;
+                res.AgregarInternalServerError(ex.Message);
             }
 
             return Json(res);
         }
 
-        public ActionResult ObtenerComunas(string i_carr_ccod)  // i_carr_ccod	"1,2"
+        public ActionResult ObtenerComunas(string i_provincias)
         {
             var res = new RespuestaBackend();
 
             try
             {
-                List<object> retorno = new List<object>();
-                List<string> listaDeAreas = new List<string>(i_carr_ccod.Split(','));
+                List<string> codigosProvincias = new List<string>(i_provincias.Split(','));
 
-                foreach (Region region in _regiones)
-                {
-                    foreach (Provincia provincia in region.provincias)
+                var comunas = _regiones
+                    .SelectMany(region => region.provincias)
+                    .Where(provincia => codigosProvincias.Contains(provincia.idProvincia.ToString()))
+                    .SelectMany(provincia => provincia.comunas)
+                    .Select(comuna => new
                     {
-                        if (listaDeAreas.Contains(provincia.idProvincia.ToString()))
-                        {
-                            foreach (Comuna comuna in provincia.comunas)
-                            {
-                                retorno.Add(new
-                                {
-                                    codigo = comuna.idComuna,
-                                    descripcion = comuna.nombreComuna
-                                });
-                            }
-                        }
-                    }
-                }
+                        codigo = comuna.idComuna,
+                        descripcion = comuna.nombreComuna
+                    })
+                    .ToList();
 
-                res.objeto = retorno;
+                res.objeto = comunas;
             }
             catch (Exception ex)
             {
-                res.status = 500;
+                res.AgregarInternalServerError(ex.Message);
             }
 
             return Json(res);
-        }
-
-        public class RespuestaBackend
-        {
-            public int status { get; set; } = 200;
-            public object objeto { get; set; }
         }
 
         public class Region

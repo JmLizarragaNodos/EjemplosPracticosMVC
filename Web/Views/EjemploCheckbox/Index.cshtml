@@ -1,119 +1,13 @@
-﻿@*<style>
-    .btn-sgte {
-        background-color: white;
-        border: none;
-        box-shadow: none !important;
-        color: #333;
-    }
+﻿<style>
 
-    .dark .btn-sgte {
-        background-color: transparent;
-        border: none;
-        box-shadow: none !important;
-        color: #fff;
-    }
-
-    .radio-ch .form-check {
-        padding-left: 10px;
-    }
-
-        .radio-ch .form-check .form-check-labe {
-            padding-left: 25px;
-        }
-
-    .externo .md-form {
-        margin-top: 0;
-    }
-
-    .select-chosen-custom .chosen-choices {
-        border: none;
-        border-bottom: 1px solid #ced4da;
-        background-image: none;
-    }
-
-    .chosen-container-active .chosen-choices {
-        box-shadow: none;
-    }
-
-    .select-chosen-custom .chosen-container-multi .chosen-choices li.search-choice {
-        background-color: #555;
-        background-image: none;
-        color: #fff;
-        border-radius: 30px;
-        border: none;
-        font-size: 1rem;
-        padding: 0.5rem 2rem 0.5rem 1rem;
-    }
-
-        .select-chosen-custom .chosen-container-multi .chosen-choices li.search-choice .search-choice-close {
-            top: 8px;
-            right: 5px;
-        }
-
-    .select-chosen-custom .chosen-container-multi .chosen-choices li .chosen-search-input[type="text"] {
-        font-size: normal;
-        font-family: "Roboto Condensed";
-        color: #333;
-        margin: 0;
-        padding: 0;
-    }
-
-    .global {
-        height: 225px;
-        /* width: 200px; */
+    .agrupador-checkbox {
+        height: 425px;
         border-right: 2px solid #ddd;
         background: #f1f1f1;
         overflow-y: scroll;
     }
 
-    .mensajes {
-        height: auto;
-    }
-
-    .texto {
-        padding: 4px;
-        background: #fff;
-    }
-
-    .dark .texto {
-        padding: 4px;
-        background: #383838;
-    }
-
-    .hidden {
-        display: none;
-    }
-
-    .note {
-        font-size: 14px;
-        color: #999;
-        font-style: italic;
-    }
-
-    label.error {
-        position: relative;
-        color: #c00 !important;
-        font-size: 80%;
-        transform: none !important;
-    }
-
-    label.count {
-        right: 0;
-        left: auto;
-        top: -20px;
-        font-size: 85%;
-        transform: none !important;
-    }
-
-        label.count.count-error {
-            color: #c00 !important;
-        }
-
-    .form-control.error {
-        box-shadow: none !important;
-        border-bottom-color: #c00 !important;
-    }
-</style>*@
+</style>
 
 <div class="page-content">
 
@@ -149,12 +43,12 @@
                             <div class=""><strong>Regiones</strong></div>
                             <div class="md-form">
                                 <input placeholder="Buscar" type="search" id="form-autocomplete" class="form-control mdb-autocomplete"><ul class="mdb-autocomplete-wrap"></ul>
-                                <button class="mdb-autocomplete-clear">
+                                @*<button class="mdb-autocomplete-clear">
                                     <i class="material-icons">close</i>
-                                </button>
+                                </button>*@
                             </div>
 
-                            <div class="global mt-2">
+                            <div class="agrupador-checkbox mt-2">
                                 <div id="probandoRegiones" class="mensajes">
                                 </div>
                             </div>
@@ -165,11 +59,11 @@
                             <div class=""><strong>Provincias</strong></div>
                             <div class="md-form">
                                 <input placeholder="Buscar" type="search" id="form-autocomplete" class="form-control mdb-autocomplete">
-                                <button class="mdb-autocomplete-clear">
+                                @*<button class="mdb-autocomplete-clear">
                                     <i class="material-icons">close</i>
-                                </button>
+                                </button>*@
                             </div>
-                            <div class="global mt-2">
+                            <div class="agrupador-checkbox mt-2">
                                 <div id="probandoProvincias" class="mensajes">
                                 </div>
                             </div>
@@ -179,11 +73,11 @@
                             <div class=""><strong>Comunas</strong></div>
                             <div class="md-form">
                                 <input placeholder="Buscar" type="search" id="form-autocomplete" class="form-control mdb-autocomplete">
-                                <button class="mdb-autocomplete-clear">
+                                @*<button class="mdb-autocomplete-clear">
                                     <i class="material-icons">close</i>
-                                </button>
+                                </button>*@
                             </div>
-                            <div class="global mt-2">
+                            <div class="agrupador-checkbox mt-2">
                                 <div id="probandoComunas" class="mensajes">
                                 </div>
                             </div>
@@ -220,256 +114,262 @@
 
 </div>
 
-<script src="https://www.inacap.cl/web/template-aplicaciones/js/jquery-3.3.1.min.js"></script>
-<script src="https://www.inacap.cl/web/template-aplicaciones/js/popper.min.js"></script>
-<script src="https://www.inacap.cl/web/template-aplicaciones/js/bootstrap.min.js"></script>
-<script src="https://www.inacap.cl/web/template-aplicaciones/js/mdb.min.js"></script>
-<script src="http://www.inacap.cl/web/template-aplicaciones/js/chosen.jquery.js"></script>
-<script src="https://www.inacap.cl/web/template-aplicaciones/js/datepicker.js"></script>
-<script src="http://www.inacap.cl/web/template-aplicaciones/js/datatables.min.js"></script>
-
 <script>
 
-        (async () =>
+    (async () =>
+    {
+        showLoading();
+
+        try {
+            let res = await obtenerDatos({
+                url: `@Url.Action("ObtenerRegiones", "EjemploCheckbox")`,
+                queryString: null
+            });
+
+            llenarElementoRegiones({ querySelector: "#probandoRegiones", arreglo: res });
+        }
+        catch (ex) {
+            console.log(ex);
+        }
+        finally { hideLoading() }
+    })();
+
+    //#region Regiones
+
+    function llenarElementoRegiones(datos)
+    {
+        document.querySelector(datos.querySelector).innerHTML = `
+        <div id="${datos.querySelector}" class="mensajes">
+            <fieldset class="form-check texto">
+                <input class="form-check-input seleccionar-todo" type="checkbox" onchange="marcarTodoRegiones(event)"
+                id="checkbox-all-area-academica">
+
+                <label class="form-check-label" for="checkbox-all-area-academica">Seleccionar todos</label>
+            </fieldset>
+
+            ${datos.arreglo.map(x =>
+            {
+                return `<fieldset class="form-check texto">
+                    <input class="form-check-input" type="checkbox" value="${x.codigo}"
+                    onchange="seleccionarRegion('${x.codigo}')" id="checkbox-area-academica-${x.codigo}">
+
+                    <label class="form-check-label" for="checkbox-area-academica-${x.codigo}">${x.descripcion}</label>
+                </fieldset>`;
+            })
+            .join("")}
+        </div>
+        `;
+    }
+
+    function seleccionarRegion(codigo)
+    {
+        let marcarTodo = Array.from(document.querySelectorAll(`#probandoRegiones input[type="checkbox"]:not(.seleccionar-todo)`)).every(x => x.checked);
+        document.querySelector("#checkbox-all-area-academica").checked = marcarTodo;
+
+        traerProvincias();
+    }
+
+    function marcarTodoRegiones(evento)
+    {
+        let estaMarcado = evento.target.checked;
+        let checkboxes = document.querySelectorAll(`#probandoRegiones input[type="checkbox"]`);
+        checkboxes.forEach(checkbox => checkbox.checked = estaMarcado);
+        traerProvincias();
+    }
+
+    //#endregion Regiones
+
+    //#region Provincias
+
+    function llenarElementoProvincias(datos)
+    {
+        document.querySelector(datos.querySelector).innerHTML = `
+        <div id="${datos.querySelector}" class="mensajes">
+            <fieldset class="form-check texto">
+                <input class="form-check-input seleccionar-todo" type="checkbox" onchange="marcarTodoProvincias(event)"
+                id="checkbox-all-programa-estudio">
+
+                <label class="form-check-label" for="checkbox-all-programa-estudio">Seleccionar todos</label>
+            </fieldset>
+
+            ${datos.arreglo.map(x =>
+            {
+                return `<fieldset class="form-check texto">
+                    <input class="form-check-input" type="checkbox" value="${x.codigo}"
+                    onchange="seleccionarProvincia('${x.codigo}')" id="checkbox-programa-estudio-${x.codigo}">
+
+                    <label class="form-check-label" for="checkbox-programa-estudio-${x.codigo}">${x.descripcion}</label>
+                </fieldset>`;
+            })
+            .join("")}
+        </div>
+        `;
+    }
+
+    function seleccionarProvincia(codigo)
+    {
+        let marcarTodo = Array.from(document.querySelectorAll(`#probandoProvincias input[type="checkbox"]:not(.seleccionar-todo)`)).every(x => x.checked);
+        document.querySelector("#checkbox-all-programa-estudio").checked = marcarTodo;
+
+        traerComunas();
+    }
+
+    function marcarTodoProvincias(evento) {
+        let estaMarcado = evento.target.checked;
+        let checkboxes = document.querySelectorAll(`#probandoProvincias input[type="checkbox"]`);
+        checkboxes.forEach(checkbox => checkbox.checked = estaMarcado);
+        traerComunas();
+    }
+
+    async function traerProvincias()
+    {
+        limpiarElemento("#probandoProvincias");
+        limpiarElemento("#probandoComunas");
+
+        let valores = obtenerValores("#probandoRegiones");
+
+        if (valores != null)
         {
             showLoading();
 
             try {
-                let res = await obtenerDatos({
-                    url: `@Url.Action("ObtenerRegiones", "EjemploCheckbox")`,
-                    queryString: null
+
+                let programaEstudios = await obtenerDatos({
+                    url: `@Url.Action("ObtenerProvincias", "EjemploCheckbox")`,
+                    queryString: `i_regiones=${valores}`
                 });
 
-                llenarElementoRegiones({ querySelector: "#probandoRegiones", arreglo: res });
+                llenarElementoProvincias({ querySelector: "#probandoProvincias", arreglo: programaEstudios });
             }
             catch (ex) {
                 console.log(ex);
             }
             finally { hideLoading() }
-        })();
-
-        function llenarElementoRegiones(datos)
-        {
-            document.querySelector(datos.querySelector).innerHTML = `
-            <div id="${datos.querySelector}" class="mensajes">
-                <fieldset class="form-check texto">
-                    <input class="form-check-input seleccionar-todo" type="checkbox" onchange="marcarTodoRegiones(event)"
-                    id="checkbox-all-area-academica">
-
-                    <label class="form-check-label" for="checkbox-all-area-academica">Seleccionar todos</label>
-                </fieldset>
-
-                ${datos.arreglo.map(x =>
-                {
-                    return `<fieldset class="form-check texto">
-                        <input class="form-check-input" type="checkbox" value="${x.codigo}"
-                        onchange="seleccionarRegion('${x.codigo}')" id="checkbox-area-academica-${x.codigo}">
-
-                        <label class="form-check-label" for="checkbox-area-academica-${x.codigo}">${x.descripcion}</label>
-                    </fieldset>`;
-                })
-                .join("")}
-            </div>
-            `;
         }
+    }
 
-        function llenarElementoProvincias(datos)
-        {
-            document.querySelector(datos.querySelector).innerHTML = `
-            <div id="${datos.querySelector}" class="mensajes">
-                <fieldset class="form-check texto">
-                    <input class="form-check-input seleccionar-todo" type="checkbox" onchange="marcarTodoProvincias(event)"
-                    id="checkbox-all-programa-estudio">
+    //#endregion Provincias
 
-                    <label class="form-check-label" for="checkbox-all-programa-estudio">Seleccionar todos</label>
-                </fieldset>
+    //#region Comunas
 
-                ${datos.arreglo.map(x =>
-                {
-                    return `<fieldset class="form-check texto">
-                        <input class="form-check-input" type="checkbox" value="${x.codigo}"
-                        onchange="seleccionarProvincia('${x.codigo}')" id="checkbox-programa-estudio-${x.codigo}">
+    function llenarElementoComunas(datos)
+    {
+        document.querySelector(datos.querySelector).innerHTML = `
+        <div id="${datos.querySelector}" class="mensajes">
+            <fieldset class="form-check texto">
+                <input class="form-check-input seleccionar-todo" type="checkbox" onchange="marcarTodoComunas(event)"
+                id="checkbox-all-asignatura">
 
-                        <label class="form-check-label" for="checkbox-programa-estudio-${x.codigo}">${x.descripcion}</label>
-                    </fieldset>`;
-                })
-                .join("")}
-            </div>
-            `;
-        }
+                <label class="form-check-label" for="checkbox-all-asignatura">Seleccionar todos</label>
+            </fieldset>
 
-        function llenarElementoComunas(datos)
-        {
-            document.querySelector(datos.querySelector).innerHTML = `
-            <div id="${datos.querySelector}" class="mensajes">
-                <fieldset class="form-check texto">
-                    <input class="form-check-input seleccionar-todo" type="checkbox" onchange="marcarTodoAsignaturas(event)"
-                    id="checkbox-all-asignatura">
-
-                    <label class="form-check-label" for="checkbox-all-asignatura">Seleccionar todos</label>
-                </fieldset>
-
-                ${datos.arreglo.map(x =>
-                {
-                    return `<fieldset class="form-check texto">
-                        <input class="form-check-input" type="checkbox" value="${x.codigo}"
-                        onchange="seleccionarAsignaturas('${x.codigo}')" id="checkbox-asignatura-${x.codigo}">
-
-                        <label class="form-check-label" for="checkbox-asignatura-${x.codigo}">${x.descripcion}</label>
-                    </fieldset>`;
-                })
-                .join("")}
-            </div>
-            `;
-        }
-
-        function marcarTodoProvincias(evento) {
-            let estaMarcado = evento.target.checked;
-            let checkboxes = document.querySelectorAll(`#probandoProvincias input[type="checkbox"]`);
-            checkboxes.forEach(checkbox => checkbox.checked = estaMarcado);
-            traerComunas();
-        }
-
-        async function seleccionarProvincia(codigo)
-        {
-            let marcarTodo = Array.from(document.querySelectorAll(`#probandoProvincias input[type="checkbox"]:not(.seleccionar-todo)`)).every(x => x.checked);
-            document.querySelector("#checkbox-all-programa-estudio").checked = marcarTodo;
-
-            traerComunas();
-        }
-
-        function obtenerValores(querySelector) 
-        {
-            let checkboxSeleccionados = Array.from(document.querySelectorAll(`${querySelector} input[type="checkbox"]:not(.seleccionar-todo)`))
-                .filter(x => x.checked);
-
-            if (checkboxSeleccionados.length > 0)
-                return checkboxSeleccionados.map(x => x.value).join(",");
-
-            return null;
-        }
-
-        function marcarTodoRegiones(evento)
-        {
-            let estaMarcado = evento.target.checked;
-            let checkboxes = document.querySelectorAll(`#probandoRegiones input[type="checkbox"]`);
-            checkboxes.forEach(checkbox => checkbox.checked = estaMarcado);
-            traerProgramasEstudio();
-        }
-
-        function marcarTodoAsignaturas(evento) {
-            let estaMarcado = evento.target.checked;
-            let checkboxes = document.querySelectorAll(`#probandoComunas input[type="checkbox"]`);
-            checkboxes.forEach(checkbox => checkbox.checked = estaMarcado);
-        }
-
-        async function seleccionarRegion(codigo)
-        {
-            let marcarTodo = Array.from(document.querySelectorAll(`#probandoRegiones input[type="checkbox"]:not(.seleccionar-todo)`)).every(x => x.checked);
-            document.querySelector("#checkbox-all-area-academica").checked = marcarTodo;
-
-            traerProgramasEstudio();
-        }
-
-        async function seleccionarAsignaturas(codigo) {
-            let marcarTodo = Array.from(document.querySelectorAll(`#probandoComunas input[type="checkbox"]:not(.seleccionar-todo)`)).every(x => x.checked);
-            document.querySelector("#checkbox-all-asignatura").checked = marcarTodo;
-        }
-
-        async function traerProgramasEstudio()
-        {
-            limpiarElemento("#probandoProvincias");
-            limpiarElemento("#probandoComunas");
-
-            let valores = obtenerValores("#probandoRegiones");
-
-            if (valores != null)
+            ${datos.arreglo.map(x =>
             {
-                showLoading();
+                return `<fieldset class="form-check texto">
+                    <input class="form-check-input" type="checkbox" value="${x.codigo}"
+                    onchange="seleccionarComuna('${x.codigo}')" id="checkbox-asignatura-${x.codigo}">
 
-                try {
+                    <label class="form-check-label" for="checkbox-asignatura-${x.codigo}">${x.descripcion}</label>
+                </fieldset>`;
+            })
+            .join("")}
+        </div>
+        `;
+    }
 
-                    let programaEstudios = await obtenerDatos({
-                        url: `@Url.Action("ObtenerProvincias", "EjemploCheckbox")`,
-                        queryString: "i_areas=" + valores
-                    });
+    function seleccionarComuna(codigo)
+    {
+        let marcarTodo = Array.from(document.querySelectorAll(`#probandoComunas input[type="checkbox"]:not(.seleccionar-todo)`)).every(x => x.checked);
+        document.querySelector("#checkbox-all-asignatura").checked = marcarTodo;
+    }
 
-                    llenarElementoProvincias({ querySelector: "#probandoProvincias", arreglo: programaEstudios });
-                }
-                catch (ex) {
-                    console.log(ex);
-                }
-                finally { hideLoading() }
-            }
-        }
+    function marcarTodoComunas(evento)
+    {
+        let estaMarcado = evento.target.checked;
+        let checkboxes = document.querySelectorAll(`#probandoComunas input[type="checkbox"]`);
+        checkboxes.forEach(checkbox => checkbox.checked = estaMarcado);
+    }
 
-        async function traerComunas()
+    async function traerComunas()
+    {
+        limpiarElemento("#probandoComunas");
+
+        let valores = obtenerValores("#probandoProvincias");
+        console.log(valores);
+
+        if (valores != null)
         {
-            limpiarElemento("#probandoComunas");
+            showLoading();
 
-            let valores = obtenerValores("#probandoProvincias");
-            console.log(valores);
+            try {
 
-            if (valores != null)
-            {
-                showLoading();
-
-                try {
-
-                    let res = await obtenerDatos({
-                        url: `@Url.Action("ObtenerComunas", "EjemploCheckbox")`,
-                        queryString: "i_carr_ccod=" + valores
-                    });
-
-                    llenarElementoComunas({ querySelector: "#probandoComunas", arreglo: res });
-                }
-                catch (ex) {
-                    console.log(ex);
-                }
-                finally { hideLoading() }
-            }
-        }
-
-        //==========================================>>>>
-
-        function obtenerDatos(datos)
-        {
-            return new Promise((resolve, reject) =>
-            {
-                fetch(datos.url, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                    body: datos.queryString,
-                })
-                .then(response =>
-                {
-                    if (response.ok)
-                    {
-                        response.json().then(res =>
-                        {
-                            if (res.status == 200)
-                                resolve(res.objeto);
-                            else
-                                reject(res);
-                        });
-                    }
-                })
-                .catch(error => {
-                    reject("Ocurrió un error al obtener la información");
+                let res = await obtenerDatos({
+                    url: `@Url.Action("ObtenerComunas", "EjemploCheckbox")`,
+                    queryString: `i_provincias=${valores}`
                 });
+
+                llenarElementoComunas({ querySelector: "#probandoComunas", arreglo: res });
+            }
+            catch (ex) {
+                console.log(ex);
+            }
+            finally { hideLoading() }
+        }
+    }
+
+    //#endregion Comunas
+
+    //==========================================>>>>
+
+    function obtenerValores(querySelector)
+    {
+        let checkboxSeleccionados = Array.from(document.querySelectorAll(`${querySelector} input[type="checkbox"]:not(.seleccionar-todo)`))
+            .filter(x => x.checked);
+
+        if (checkboxSeleccionados.length > 0)
+            return checkboxSeleccionados.map(x => x.value).join(",");
+
+        return null;
+    }
+
+    function obtenerDatos(datos)
+    {
+        return new Promise((resolve, reject) =>
+        {
+            fetch(datos.url, {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: datos.queryString,
+            })
+            .then(response =>
+            {
+                if (response.ok)
+                {
+                    response.json().then(res =>
+                    {
+                        if (res.status == 200)
+                            resolve(res.objeto);
+                        else
+                            reject(res);
+                    });
+                }
+            })
+            .catch(error => {
+                reject("Ocurrió un error al obtener la información");
             });
-        }
+        });
+    }
 
-        function showLoading() {
-            $('#loadingOverlay').show();
-        }
+    function showLoading() {
+        $('#loadingOverlay').show();
+    }
 
-        function hideLoading() {
-            $('#loadingOverlay').hide();
-        }
+    function hideLoading() {
+        $('#loadingOverlay').hide();
+    }
 
-        function limpiarElemento(querySelector) {
-            document.querySelector(querySelector).innerHTML = "";
-        }
+    function limpiarElemento(querySelector) {
+        document.querySelector(querySelector).innerHTML = "";
+    }
 
 </script>
