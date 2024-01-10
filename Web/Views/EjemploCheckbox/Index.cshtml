@@ -155,7 +155,7 @@
                             </div>
 
                             <div class="global mt-2">
-                                <div id="probandoAreasAcademicas" class="mensajes">
+                                <div id="probandoRegiones" class="mensajes">
                                 </div>
                             </div>
                         </div>
@@ -170,7 +170,7 @@
                                 </button>
                             </div>
                             <div class="global mt-2">
-                                <div id="probandoProgramasEstudio" class="mensajes">
+                                <div id="probandoProvincias" class="mensajes">
                                 </div>
                             </div>
                         </div>
@@ -184,7 +184,7 @@
                                 </button>
                             </div>
                             <div class="global mt-2">
-                                <div id="probandoAsignaturas" class="mensajes">
+                                <div id="probandoComunas" class="mensajes">
                                 </div>
                             </div>
                         </div>
@@ -230,19 +230,17 @@
 
 <script>
 
-        const urlBackend = "https://localhost:44375";
-
         (async () =>
         {
             showLoading();
 
             try {
                 let res = await obtenerDatos({
-                    url: `https://localhost:44353/EjemploCheckbox/ObtenerRegiones`,
+                    url: `@Url.Action("ObtenerRegiones", "EjemploCheckbox")`,
                     queryString: null
                 });
 
-                llenarElementoAreaAcademica({ querySelector: "#probandoAreasAcademicas", arreglo: res });
+                llenarElementoRegiones({ querySelector: "#probandoRegiones", arreglo: res });
             }
             catch (ex) {
                 console.log(ex);
@@ -250,12 +248,12 @@
             finally { hideLoading() }
         })();
 
-        function llenarElementoAreaAcademica(datos)
+        function llenarElementoRegiones(datos)
         {
             document.querySelector(datos.querySelector).innerHTML = `
             <div id="${datos.querySelector}" class="mensajes">
                 <fieldset class="form-check texto">
-                    <input class="form-check-input seleccionar-todo" type="checkbox" onchange="marcarTodoAreaAcademica(event)"
+                    <input class="form-check-input seleccionar-todo" type="checkbox" onchange="marcarTodoRegiones(event)"
                     id="checkbox-all-area-academica">
 
                     <label class="form-check-label" for="checkbox-all-area-academica">Seleccionar todos</label>
@@ -265,7 +263,7 @@
                 {
                     return `<fieldset class="form-check texto">
                         <input class="form-check-input" type="checkbox" value="${x.codigo}"
-                        onchange="seleccionarAreaAcademica('${x.codigo}')" id="checkbox-area-academica-${x.codigo}">
+                        onchange="seleccionarRegion('${x.codigo}')" id="checkbox-area-academica-${x.codigo}">
 
                         <label class="form-check-label" for="checkbox-area-academica-${x.codigo}">${x.descripcion}</label>
                     </fieldset>`;
@@ -275,12 +273,12 @@
             `;
         }
 
-        function llenarElementoProgramasEstudio(datos)
+        function llenarElementoProvincias(datos)
         {
             document.querySelector(datos.querySelector).innerHTML = `
             <div id="${datos.querySelector}" class="mensajes">
                 <fieldset class="form-check texto">
-                    <input class="form-check-input seleccionar-todo" type="checkbox" onchange="marcarTodoProgramasEstudio(event)"
+                    <input class="form-check-input seleccionar-todo" type="checkbox" onchange="marcarTodoProvincias(event)"
                     id="checkbox-all-programa-estudio">
 
                     <label class="form-check-label" for="checkbox-all-programa-estudio">Seleccionar todos</label>
@@ -290,7 +288,7 @@
                 {
                     return `<fieldset class="form-check texto">
                         <input class="form-check-input" type="checkbox" value="${x.codigo}"
-                        onchange="seleccionarProgramaEstudio('${x.codigo}')" id="checkbox-programa-estudio-${x.codigo}">
+                        onchange="seleccionarProvincia('${x.codigo}')" id="checkbox-programa-estudio-${x.codigo}">
 
                         <label class="form-check-label" for="checkbox-programa-estudio-${x.codigo}">${x.descripcion}</label>
                     </fieldset>`;
@@ -300,7 +298,7 @@
             `;
         }
 
-        function llenarElementoAsignaturas(datos)
+        function llenarElementoComunas(datos)
         {
             document.querySelector(datos.querySelector).innerHTML = `
             <div id="${datos.querySelector}" class="mensajes">
@@ -325,22 +323,22 @@
             `;
         }
 
-        function marcarTodoProgramasEstudio(evento) {
+        function marcarTodoProvincias(evento) {
             let estaMarcado = evento.target.checked;
-            let checkboxes = document.querySelectorAll(`#probandoProgramasEstudio input[type="checkbox"]`);
+            let checkboxes = document.querySelectorAll(`#probandoProvincias input[type="checkbox"]`);
             checkboxes.forEach(checkbox => checkbox.checked = estaMarcado);
-            traerAsignaturas();
+            traerComunas();
         }
 
-        async function seleccionarProgramaEstudio(codigo)
+        async function seleccionarProvincia(codigo)
         {
-            let marcarTodo = Array.from(document.querySelectorAll(`#probandoProgramasEstudio input[type="checkbox"]:not(.seleccionar-todo)`)).every(x => x.checked);
+            let marcarTodo = Array.from(document.querySelectorAll(`#probandoProvincias input[type="checkbox"]:not(.seleccionar-todo)`)).every(x => x.checked);
             document.querySelector("#checkbox-all-programa-estudio").checked = marcarTodo;
 
-            traerAsignaturas();
+            traerComunas();
         }
 
-        function obtenerValores(querySelector)  // obtenerValores("#probandoAreasAcademicas")
+        function obtenerValores(querySelector) 
         {
             let checkboxSeleccionados = Array.from(document.querySelectorAll(`${querySelector} input[type="checkbox"]:not(.seleccionar-todo)`))
                 .filter(x => x.checked);
@@ -351,40 +349,39 @@
             return null;
         }
 
-        function marcarTodoAreaAcademica(evento)
+        function marcarTodoRegiones(evento)
         {
             let estaMarcado = evento.target.checked;
-            let checkboxes = document.querySelectorAll(`#probandoAreasAcademicas input[type="checkbox"]`);
+            let checkboxes = document.querySelectorAll(`#probandoRegiones input[type="checkbox"]`);
             checkboxes.forEach(checkbox => checkbox.checked = estaMarcado);
             traerProgramasEstudio();
         }
 
         function marcarTodoAsignaturas(evento) {
             let estaMarcado = evento.target.checked;
-            let checkboxes = document.querySelectorAll(`#probandoAsignaturas input[type="checkbox"]`);
+            let checkboxes = document.querySelectorAll(`#probandoComunas input[type="checkbox"]`);
             checkboxes.forEach(checkbox => checkbox.checked = estaMarcado);
-            //traerAsignaturas();
         }
 
-        async function seleccionarAreaAcademica(codigo)
+        async function seleccionarRegion(codigo)
         {
-            let marcarTodo = Array.from(document.querySelectorAll(`#probandoAreasAcademicas input[type="checkbox"]:not(.seleccionar-todo)`)).every(x => x.checked);
+            let marcarTodo = Array.from(document.querySelectorAll(`#probandoRegiones input[type="checkbox"]:not(.seleccionar-todo)`)).every(x => x.checked);
             document.querySelector("#checkbox-all-area-academica").checked = marcarTodo;
 
             traerProgramasEstudio();
         }
 
         async function seleccionarAsignaturas(codigo) {
-            let marcarTodo = Array.from(document.querySelectorAll(`#probandoAsignaturas input[type="checkbox"]:not(.seleccionar-todo)`)).every(x => x.checked);
+            let marcarTodo = Array.from(document.querySelectorAll(`#probandoComunas input[type="checkbox"]:not(.seleccionar-todo)`)).every(x => x.checked);
             document.querySelector("#checkbox-all-asignatura").checked = marcarTodo;
         }
 
         async function traerProgramasEstudio()
         {
-            limpiarElemento("#probandoProgramasEstudio");
-            limpiarElemento("#probandoAsignaturas");
+            limpiarElemento("#probandoProvincias");
+            limpiarElemento("#probandoComunas");
 
-            let valores = obtenerValores("#probandoAreasAcademicas");
+            let valores = obtenerValores("#probandoRegiones");
 
             if (valores != null)
             {
@@ -393,13 +390,11 @@
                 try {
 
                     let programaEstudios = await obtenerDatos({
-                        //url: `${urlBackend}/Combobox/GetCboProgramaEstudios`,
-                        url: `https://localhost:44353/EjemploCheckbox/ObtenerProvincias`,
+                        url: `@Url.Action("ObtenerProvincias", "EjemploCheckbox")`,
                         queryString: "i_areas=" + valores
                     });
 
-                    //console.log("programaEstudios", programaEstudios);
-                    llenarElementoProgramasEstudio({ querySelector: "#probandoProgramasEstudio", arreglo: programaEstudios });
+                    llenarElementoProvincias({ querySelector: "#probandoProvincias", arreglo: programaEstudios });
                 }
                 catch (ex) {
                     console.log(ex);
@@ -408,11 +403,11 @@
             }
         }
 
-        async function traerAsignaturas()
+        async function traerComunas()
         {
-            limpiarElemento("#probandoAsignaturas");
+            limpiarElemento("#probandoComunas");
 
-            let valores = obtenerValores("#probandoProgramasEstudio");
+            let valores = obtenerValores("#probandoProvincias");
             console.log(valores);
 
             if (valores != null)
@@ -422,12 +417,11 @@
                 try {
 
                     let res = await obtenerDatos({
-                        //url: `${urlBackend}/Combobox/GetAsignaturasSelect2`,
-                        url: `https://localhost:44353/EjemploCheckbox/ObtenerComunas`,
+                        url: `@Url.Action("ObtenerComunas", "EjemploCheckbox")`,
                         queryString: "i_carr_ccod=" + valores
                     });
 
-                    llenarElementoAsignaturas({ querySelector: "#probandoAsignaturas", arreglo: res });
+                    llenarElementoComunas({ querySelector: "#probandoComunas", arreglo: res });
                 }
                 catch (ex) {
                     console.log(ex);
