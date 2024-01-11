@@ -5,17 +5,50 @@ using System.Linq;
 using System.Web.Mvc;
 using Web.Dto;
 
-// https://localhost:44353/EjemploCheckbox
-
 namespace Web.Controllers
 {
     public class EjemploCheckboxController : Controller
     {
         private static List<Region> _regiones = CargarRegiones();
 
-        public ActionResult Index()
+        public ActionResult Index()  // https://localhost:44353/EjemploCheckbox
         {
             return View();
+        }
+
+        public ActionResult Probando()  // https://localhost:44353/EjemploCheckbox/Probando
+        {
+            var res = new RespuestaBackend();
+
+            try
+            {
+                var regiones = ObtenerRegionesDePrueba();
+                regiones.FirstOrDefault(x => x.codigo == "3").estaSeleccionado = true;
+                regiones.FirstOrDefault(x => x.codigo == "6").estaSeleccionado = true;
+
+                var codigosRegiones = regiones.Where(x => x.estaSeleccionado).Select(x => x.codigo).ToList();
+                
+                var provincias = ObtenerProvinciasDePrueba(codigosRegiones);
+                provincias.FirstOrDefault(x => x.codigo == "6").estaSeleccionado = true;
+                provincias.FirstOrDefault(x => x.codigo == "7").estaSeleccionado = true;
+                provincias.FirstOrDefault(x => x.codigo == "14").estaSeleccionado = true;
+
+                var codigosProvincias = provincias.Where(x => x.estaSeleccionado).Select(x => x.codigo).ToList();
+
+                var comunas = ObtenerComunasDePrueba(codigosProvincias);
+                comunas.FirstOrDefault(x => x.codigo == "16").estaSeleccionado = true;
+                comunas.FirstOrDefault(x => x.codigo == "20").estaSeleccionado = true;
+                comunas.FirstOrDefault(x => x.codigo == "47").estaSeleccionado = true;
+                comunas.FirstOrDefault(x => x.codigo == "51").estaSeleccionado = true;
+
+                res.objeto = new { regiones, provincias, comunas };
+            }
+            catch (Exception ex)
+            {
+                res.AgregarInternalServerError(ex.Message);
+            }
+
+            return Json(res, JsonRequestBehavior.AllowGet);
         }
 
         public ActionResult ObtenerRegiones()
@@ -34,7 +67,7 @@ namespace Web.Controllers
             return Json(res);
         }
 
-        public ActionResult ObtenerProvincias(string i_regiones)
+        public ActionResult ObtenerProvincias(string i_regiones)  // i_regiones="3,6"
         {
             var res = new RespuestaBackend();
 
@@ -52,7 +85,7 @@ namespace Web.Controllers
             return Json(res);
         }
 
-        public ActionResult ObtenerComunas(string i_provincias)
+        public ActionResult ObtenerComunas(string i_provincias)  // i_provincias="6,7,14"
         {
             var res = new RespuestaBackend();
 
