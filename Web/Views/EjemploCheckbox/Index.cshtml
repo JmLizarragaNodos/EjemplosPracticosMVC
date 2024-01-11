@@ -140,7 +140,7 @@
             });
 
             llenarElementoRegiones();
-            document.querySelector("#checkbox-all-area-academica").checked = arregloRegiones.every(x => x.estaSeleccionado);
+            evaluarMarcarTodoRegiones();
         }
         catch (ex) {
             console.log(ex);
@@ -177,7 +177,7 @@
                     <label class="form-check-label" for="checkbox-all-area-academica">Seleccionar todos</label>
                 </fieldset>`
             : ""}
-            
+
             ${arreglo.map(x =>
             {
                 return `<fieldset class="form-check texto">
@@ -193,13 +193,23 @@
         `;
     }
 
-    function seleccionarRegion(codigo)
+    async function seleccionarRegion(codigo)
     {
+        arregloComunas = [];
+
         let elemento = arregloRegiones.find(x => x.codigo == codigo);
         elemento.estaSeleccionado = !elemento.estaSeleccionado;
 
         evaluarMarcarTodoRegiones();
-        traerProvincias();
+
+        document.querySelector("#buscarProvincia").value = "";
+        document.querySelector("#buscarComuna").value = "";
+        limpiarElemento("#probandoProvincias");
+        limpiarElemento("#probandoComunas");
+
+        arregloProvincias = await obtenerProvinciasApi();  // NUEVO 11-1-2024
+        desplegarProvincias();
+        evaluarMarcarTodoProvincias();
     }
 
     function evaluarMarcarTodoRegiones()
@@ -214,8 +224,10 @@
         }
     }
 
-    function marcarTodoRegiones(evento)
+    async function marcarTodoRegiones(evento)
     {
+        arregloComunas = [];
+
         let estaMarcado = evento.target.checked;
 
         // Marca todos los elementos del arreglo en su atributo estaSeleccionado con el valor correspondiente
@@ -224,7 +236,13 @@
         let checkboxes = document.querySelectorAll(`#probandoRegiones input[type="checkbox"]`);
         checkboxes.forEach(checkbox => checkbox.checked = estaMarcado);
 
-        traerProvincias();
+        document.querySelector("#buscarProvincia").value = "";
+        limpiarElemento("#probandoProvincias");
+        limpiarElemento("#probandoComunas");
+
+        arregloProvincias = await obtenerProvinciasApi();  // NUEVO 11-1-2024
+        desplegarProvincias();
+        evaluarMarcarTodoProvincias();
     }
 
     //#endregion Regiones
@@ -235,11 +253,11 @@
     {
         let busqueda = e.value;
         if (busqueda == "") busqueda = null;
-        llenarElementoProvincias(busqueda);
+        desplegarProvincias(busqueda);
         evaluarMarcarTodoProvincias();
     }
 
-    function llenarElementoProvincias(busqueda = null)
+    function desplegarProvincias(busqueda = null)
     {
         let querySelector = "#probandoProvincias";
         let arreglo = arregloProvincias;
@@ -274,13 +292,17 @@
         `;
     }
 
-    function seleccionarProvincia(codigo)
+    async function seleccionarProvincia(codigo)
     {
         let elemento = arregloProvincias.find(x => x.codigo == codigo);
         elemento.estaSeleccionado = !elemento.estaSeleccionado;
 
         evaluarMarcarTodoProvincias();
-        traerComunas();
+
+        limpiarDespliegueComunas();
+        arregloComunas = await obtenerComunasApi();  // NUEVO 11-1-2024
+        desplegarComunas();
+        evaluarMarcarTodoComunas();
     }
 
     function evaluarMarcarTodoProvincias()
@@ -295,7 +317,7 @@
         }
     }
 
-    function marcarTodoProvincias(evento)
+    async function marcarTodoProvincias(evento)
     {
         let estaMarcado = evento.target.checked;
 
@@ -305,44 +327,41 @@
         let checkboxes = document.querySelectorAll(`#probandoProvincias input[type="checkbox"]`);
         checkboxes.forEach(checkbox => checkbox.checked = estaMarcado);
 
-        traerComunas();
+        limpiarDespliegueComunas();
+        arregloComunas = await obtenerComunasApi();  // NUEVO 11-1-2024
+        desplegarComunas();
+        evaluarMarcarTodoComunas();
     }
 
-    async function traerProvincias()
+    function obtenerProvinciasApi()  // NUEVO 11-1-2024
     {
-        document.querySelector("#buscarProvincia").value = "";
-
-        arregloProvincias = [];
-        arregloComunas = [];
-
-        limpiarElemento("#probandoProvincias");
-        limpiarElemento("#probandoComunas");
-
-        if (arregloRegiones.some(x => x.estaSeleccionado))
+        return new Promise(async (resolve, reject) =>
         {
-            //let valores = obtenerValores("#probandoRegiones");
-            let valores = arregloRegiones.filter(x => x.estaSeleccionado).map(x => x.codigo).join(",");
-
-            if (valores != null)
+            if (arregloRegiones.some(x => x.estaSeleccionado))
             {
-                showLoading();
+                //let valores = obtenerValores("#probandoRegiones");
+                let valores = arregloRegiones.filter(x => x.estaSeleccionado).map(x => x.codigo).join(",");
 
-                try {
+                if (valores != null)
+                {
+                    showLoading();
 
-                    arregloProvincias = await obtenerDatos({
-                        url: `@Url.Action("ObtenerProvincias", "EjemploCheckbox")`,
-                        queryString: `i_regiones=${valores}`
-                    });
+                    try {
 
-                    llenarElementoProvincias();
-                    document.querySelector("#checkbox-all-programa-estudio").checked = arregloProvincias.every(x => x.estaSeleccionado);
+                        let res = await obtenerDatos({
+                            url: `@Url.Action("ObtenerProvincias", "EjemploCheckbox")`,
+                            queryString: `i_regiones=${valores}`
+                        });
+
+                        resolve(res);
+                    }
+                    catch (ex) {
+                        reject(ex);
+                    }
+                    finally { hideLoading() }
                 }
-                catch (ex) {
-                    console.log(ex);
-                }
-                finally { hideLoading() }
             }
-        }
+        });
     }
 
     //#endregion Provincias
@@ -353,11 +372,11 @@
     {
         let busqueda = e.value;
         if (busqueda == "") busqueda = null;
-        llenarElementoComunas(busqueda);
+        desplegarComunas(busqueda);
         evaluarMarcarTodoComunas();
     }
 
-    function llenarElementoComunas(busqueda = null)
+    function desplegarComunas(busqueda = null)
     {
         let querySelector = "#probandoComunas";
         let arreglo = arregloComunas;
@@ -422,37 +441,42 @@
         }
     }
 
-    async function traerComunas()
+    function obtenerComunasApi()  // NUEVO 11-1-2024
+    {
+        return new Promise(async (resolve, reject) =>
+        {
+            if (arregloProvincias.some(x => x.estaSeleccionado))
+            {
+                //let valores = obtenerValores("#probandoProvincias");
+                let valores = arregloProvincias.filter(x => x.estaSeleccionado).map(x => x.codigo).join(",");
+
+                if (valores != null)
+                {
+                    showLoading();
+
+                    try
+                    {
+                        let res = await obtenerDatos({
+                            url: `@Url.Action("ObtenerComunas", "EjemploCheckbox")`,
+                            queryString: `i_provincias=${valores}`
+                        });
+
+                        resolve(res);
+                    }
+                    catch (ex) {
+                        reject(ex);
+                    }
+                    finally { hideLoading() }
+                }
+            }
+
+        });
+    }
+
+    function limpiarDespliegueComunas()
     {
         document.querySelector("#buscarComuna").value = "";
-        arregloComunas = [];
         limpiarElemento("#probandoComunas");
-
-        if (arregloProvincias.some(x => x.estaSeleccionado))
-        {
-            //let valores = obtenerValores("#probandoProvincias");
-            let valores = arregloProvincias.filter(x => x.estaSeleccionado).map(x => x.codigo).join(",");
-
-            if (valores != null)
-            {
-                showLoading();
-
-                try {
-
-                    arregloComunas = await obtenerDatos({
-                        url: `@Url.Action("ObtenerComunas", "EjemploCheckbox")`,
-                        queryString: `i_provincias=${valores}`
-                    });
-
-                    llenarElementoComunas();
-                    document.querySelector("#checkbox-all-asignatura").checked = arregloComunas.every(x => x.estaSeleccionado);
-                }
-                catch (ex) {
-                    console.log(ex);
-                }
-                finally { hideLoading() }
-            }
-        }
     }
 
     //#endregion Comunas
