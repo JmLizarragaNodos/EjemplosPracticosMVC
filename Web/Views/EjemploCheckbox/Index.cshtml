@@ -45,10 +45,6 @@
                                 <input placeholder="Buscar"
                                 oninput="buscarRegion(this)" id="buscarRegion"
                                 type="search" class="form-control mdb-autocomplete">
-                                
-                                @*<button class="mdb-autocomplete-clear">
-                                    <i class="material-icons">close</i>
-                                </button>*@
                             </div>
 
                             <div class="agrupador-checkbox mt-2">
@@ -64,10 +60,6 @@
                                 <input placeholder="Buscar" 
                                 oninput="buscarProvincia(this)" id="buscarProvincia"
                                 type="search" class="form-control mdb-autocomplete">
-
-                                @*<button class="mdb-autocomplete-clear">
-                                    <i class="material-icons">close</i>
-                                </button>*@
                             </div>
                             <div class="agrupador-checkbox mt-2">
                                 <div id="probandoProvincias" class="mensajes">
@@ -81,10 +73,6 @@
                                 <input placeholder="Buscar" 
                                 oninput="buscarComuna(this)" id="buscarComuna"      
                                 type="search" class="form-control mdb-autocomplete">
-
-                                @*<button class="mdb-autocomplete-clear">
-                                    <i class="material-icons">close</i>
-                                </button>*@
                             </div>
                             <div class="agrupador-checkbox mt-2">
                                 <div id="probandoComunas" class="mensajes">
@@ -102,12 +90,12 @@
                         </div>
                         <div class="col col-md-6 d-flex justify-content-end">
 
-                            <button type="button" class="btn btn-outline waves-effect waves-light">
-                                <span>No hace nada</span>
+                            <button type="button" onclick="probando()" class="btn btn-primary">
+                                <span>Probando traer datos</span>
                             </button>
 
-                            <button type="button" class="btn btn-default waves-effect waves-light">
-                                <span>No hace nada</span>
+                            <button type="button" onclick="imprimirElementosSeleccionados()" class="btn btn-secondary">
+                                <span>Imprimir elementos seleccionados</span>
                             </button>
 
                         </div>
@@ -195,6 +183,7 @@
 
     async function seleccionarRegion(codigo)
     {
+        arregloProvincias = [];
         arregloComunas = [];
 
         let elemento = arregloRegiones.find(x => x.codigo == codigo);
@@ -226,6 +215,7 @@
 
     async function marcarTodoRegiones(evento)
     {
+        arregloProvincias = [];
         arregloComunas = [];
 
         let estaMarcado = evento.target.checked;
@@ -294,6 +284,7 @@
 
     async function seleccionarProvincia(codigo)
     {
+        arregloComunas = [];
         let elemento = arregloProvincias.find(x => x.codigo == codigo);
         elemento.estaSeleccionado = !elemento.estaSeleccionado;
 
@@ -319,6 +310,7 @@
 
     async function marcarTodoProvincias(evento)
     {
+        arregloComunas = [];
         let estaMarcado = evento.target.checked;
 
         // Marca todos los elementos del arreglo en su atributo estaSeleccionado con el valor correspondiente
@@ -493,6 +485,46 @@
 
     //    return null;
     //}
+
+    async function probando()
+    {
+        showLoading();
+
+        try {
+            let res = await obtenerDatos({
+                url: `@Url.Action("Probando", "EjemploCheckbox")`,
+                queryString: null
+            });
+
+            // Desplegar Regiones
+            arregloRegiones = res.regiones;
+            llenarElementoRegiones();
+            evaluarMarcarTodoRegiones();
+
+            // Desplegar Provincias
+            arregloProvincias = res.provincias;
+            desplegarProvincias();
+            evaluarMarcarTodoProvincias();
+
+            // Desplegar Comunas
+            arregloComunas = res.comunas;
+            desplegarComunas();
+            evaluarMarcarTodoComunas();
+        }
+        catch (ex) {
+            console.log(ex);
+        }
+        finally { hideLoading() }
+    }
+
+    function imprimirElementosSeleccionados()
+    {
+        let cadena = `Regiones: ${arregloRegiones.filter(x => x.estaSeleccionado).map(x => x.codigo).join(", ")} \n\n`;
+        cadena += `Provincias: ${arregloProvincias.filter(x => x.estaSeleccionado).map(x => x.codigo).join(", ")} \n\n`;
+        cadena += `Comunas: ${arregloComunas.filter(x => x.estaSeleccionado).map(x => x.codigo).join(", ")}`;
+
+        alert(cadena);
+    }
 
     function obtenerDatos(datos)
     {

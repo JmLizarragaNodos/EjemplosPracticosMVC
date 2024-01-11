@@ -27,7 +27,7 @@ namespace Web.Controllers
                 regiones.FirstOrDefault(x => x.codigo == "6").estaSeleccionado = true;
 
                 var codigosRegiones = regiones.Where(x => x.estaSeleccionado).Select(x => x.codigo).ToList();
-                
+
                 var provincias = ObtenerProvinciasDePrueba(codigosRegiones);
                 provincias.FirstOrDefault(x => x.codigo == "6").estaSeleccionado = true;
                 provincias.FirstOrDefault(x => x.codigo == "7").estaSeleccionado = true;
