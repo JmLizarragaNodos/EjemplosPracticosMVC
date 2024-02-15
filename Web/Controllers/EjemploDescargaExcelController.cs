@@ -30,9 +30,9 @@ namespace Web.Controllers
         }
 
         [HttpPost]
-        public ActionResult Exportar()
+        public ActionResult Exportar(string nombreArchivo)
         {
-            string nombreArchivo = "Probando.xlsx";
+            nombreArchivo = $"{nombreArchivo}.xlsx";
 
             try
             {
