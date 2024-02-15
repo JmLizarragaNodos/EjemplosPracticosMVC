@@ -1,0 +1,60 @@
+﻿
+
+<button onclick="descargarExcel()" class="btn btn-primary">Descargar Excel</button>
+
+<script>
+
+    function descargarExcel()
+    {
+        showLoading();
+
+        fetch("@Url.Action("Exportar", "EjemploDescargaExcel")", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            //body: JSON.stringify({ mensaje: "Hola" })
+        })
+        .then(res =>
+        {
+            if (!res.ok)
+                throw Error(res.statusText);
+
+            const header = res.headers.get("Content-Disposition");
+            const contentType = res.headers.get("content-type");
+
+            if (contentType && contentType.includes("json"))  // Si la respuesta es un error
+            {
+                res.json().then(data => mostrarErroresRespuestaBackend(data));
+                return null;
+            }
+
+            const parts = header.split(";");
+            filename = parts[1].split("=")[1].replaceAll("\"", "");
+            return res.blob();
+        })
+        .then(blob =>
+        {
+            if (blob != null)
+            {
+                var url = window.URL.createObjectURL(blob);
+                var a = document.createElement("a");
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            }
+        })
+        .catch(() => toastr.error("Se encontró un error al descargar el archivo csv de ejemplo"))
+        .finally(() => hideLoading());
+    }
+
+    function showLoading() {
+
+    }
+
+    function hideLoading() {
+
+    }
+
+</script>
+
