@@ -1,14 +1,14 @@
 ﻿
 
-<button onclick="descargarExcel()" class="btn btn-primary">Descargar Excel</button>
+<button onclick="descargarCsv()" class="btn btn-primary">Descargar Csv</button>
 
 <script>
 
-    function descargarExcel()
+    function descargarCsv()
     {
         showLoading();
 
-        let url = "@Url.Action("Exportar", "EjemploDescargaExcel")";
+        let url = "@Url.Action("Exportar", "EjemploDescargaCsv")";
         let fecha = "16-02-2024";
 
         fetch(url, {
@@ -47,7 +47,7 @@
                 a.remove();
             }
         })
-        .catch(() => alert("Se encontró un error al descargar el archivo xlsx"))
+        .catch(() => alert("Se encontró un error al descargar el archivo csv"))
         .finally(() => hideLoading());
     }
 

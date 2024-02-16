@@ -171,12 +171,14 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Global.asax" />
+    <Content Include="Img\favicon.ico" />
     <Content Include="Img\foto_pdf.png" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\EjemploCheckboxController.cs" />
+    <Compile Include="Controllers\EjemploDescargaCsvController.cs" />
     <Compile Include="Controllers\EjemploDescargaExcelController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\OpenHtmlToPdfController.cs" />
@@ -198,6 +200,7 @@
     <Content Include="Views\Select2\Index.cshtml" />
     <Content Include="Views\EjemploCheckbox\Index.cshtml" />
     <Content Include="Views\EjemploDescargaExcel\Index.cshtml" />
+    <Content Include="Views\EjemploDescargaCsv\Index.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

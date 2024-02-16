@@ -5,6 +5,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
+    <link rel="shortcut icon" type="image/x-icon" href="~/Img/favicon.ico" />
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script> <!-- Generar Excel -->
     <!-- Bootstrap CSS -->
@@ -45,6 +47,9 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="@Url.Action("Index", "EjemploDescargaExcel")">Descarga Excel</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Index", "EjemploDescargaCsv")">Descarga Csv</a>
                     </li>
                 </ul>
             </div>
