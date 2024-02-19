@@ -28,6 +28,8 @@ namespace Web.Controllers
             public string NombreCompleto { get; set; }
         }
 
+        // Estoy usando la libreria ClosedXML versión 0.102.2.
+        // En asp.net mvc necesito llenar la variable blob con el archivo generado
         [HttpPost]
         public ActionResult Exportar(string fecha)
         {
@@ -69,6 +71,8 @@ namespace Web.Controllers
 
                 using (MemoryStream memoryStream = new MemoryStream())
                 {
+                    byte[] blob = memoryStream.ToArray(); // Esto es para guardar el archivo en la DB en formato blob
+
                     wb.SaveAs(memoryStream);
                     memoryStream.WriteTo(Response.OutputStream);
                     Response.Flush();
