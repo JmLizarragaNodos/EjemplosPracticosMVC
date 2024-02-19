@@ -71,7 +71,7 @@ namespace Web.Controllers
 
                 using (MemoryStream memoryStream = new MemoryStream())
                 {
-                    byte[] blob = memoryStream.ToArray(); // Esto es para guardar el archivo en la DB en formato blob
+                    // byte[] blob = memoryStream.ToArray(); // Esto es para guardar el archivo en la DB en formato blob
 
                     wb.SaveAs(memoryStream);
                     memoryStream.WriteTo(Response.OutputStream);
