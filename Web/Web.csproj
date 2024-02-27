@@ -184,6 +184,7 @@
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\OpenHtmlToPdfController.cs" />
     <Compile Include="Controllers\Select2Controller.cs" />
+    <Compile Include="Dto\Grilla.cs" />
     <Compile Include="Dto\RespuestaBackend.cs" />
     <Compile Include="Dto\Select2.cs" />
     <Compile Include="Global.asax.cs">

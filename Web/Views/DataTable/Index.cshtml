@@ -17,6 +17,9 @@
                 <table id="TablaResultados" class="datatables table table-hover table-striped table-bordered m-0" width="100%">
                     <thead>
                         <tr>
+                            <th>
+                                <input type="checkbox" name="seleccionarTodo" onchange="seleccionarTodo(this)" />
+                            </th>
                             <th>N&deg;</th>
                             <th>NOMBRE</th>
                         </tr>
@@ -52,47 +55,96 @@
 
 <script>
 
-    let oTable = $("#TablaResultados").DataTable({
-        dom: '<"top top-grey"<"dataTables_actions"f>> <t> <"bottom mt-2 d-flex align-items-center justify-content-between flex-wrap"<"d-flex" il>p>',
-        scrollY: "60vh",
-        scrollX: true,
-        lengthMenu: [[10, 20, 30, 50, -1], [10, 20, 30, 50, "Todas"]],
-        aaSorting: [],
-        processing: true,             // for show progress bar
-        serverSide: true,             // for process server side
-        filter: true,                 // this is for disable filter (search box)
-        orderMulti: false,            // for disable multiple column at once
-        initComplete: () =>
-        {
-            var input = $('.dataTables_filter input');
-            var wait = null;
-            input.unbind().bind('keyup', () => {
-                clearTimeout(wait);
-                wait = setTimeout(() => {
-                    oTable.search(input.val()).draw();
-                }, 500); // Retraso de 500 milisegundos antes de realizar la búsqueda
-            });
-        },
-        ajax: {
-          url: "@Url.Action("ObtenerDatos", "DataTable")",
-          type: "post",
-          datatype: "json",
-          beforeSend: () => {
-            showLoading();
-          },
-          error: () => {
-            alert("Se encontró un error al realizar la consulta");
-          },
-          complete: () => {
-            hideLoading();
-          }
-      },
-      columns: [
-          { "className": "text-nowrap", "render": (data, type, row, meta) => row.codigo },
-          { "className": "text-nowrap", "render": (data, type, row, meta) => row.nombre }
-      ],
-      order: [[1, 'desc']]    // Ordena por codigo
-    });
+    let arreglo = [];
+    let estaTodoSeleccionado = false;
+
+    (() => {
+        desplegarGrilla();
+    })();
+
+    function desplegarGrilla()
+    {
+        var oTable = $("#TablaResultados").DataTable({
+            destroy: true,
+            dom: '<"top top-grey"<"dataTables_actions"f>> <t> <"bottom mt-2 d-flex align-items-center justify-content-between flex-wrap"<"d-flex" il>p>',
+            scrollY: "60vh",
+            scrollX: true,
+            lengthMenu: [[10, 20, 30, 50, -1], [10, 20, 30, 50, "Todas"]],
+            aaSorting: [],
+            processing: true,             // for show progress bar
+            serverSide: true,             // for process server side
+            filter: true,                 // this is for disable filter (search box)
+            orderMulti: false,            // for disable multiple column at once
+            initComplete: () =>
+            {
+                    var input = $('.dataTables_filter input');
+                    var wait = null;
+                    input.unbind().bind('keyup', () => {
+                        clearTimeout(wait);
+                        wait = setTimeout(() => {
+                            oTable.search(input.val()).draw();
+                        }, 500); // Retraso de 500 milisegundos antes de realizar la búsqueda
+                    });
+            },
+            ajax: {
+                  url: "@Url.Action("ObtenerDatos", "DataTable")",
+                  type: "post",
+                  datatype: "json",
+                  beforeSend: () => {
+                    showLoading();
+                  },
+                  error: () => {
+                    alert("Se encontró un error al realizar la consulta");
+                  },
+                  complete: () => {
+                    hideLoading();
+                  }
+            },
+            columns: [
+                {
+                    "className": "text-nowrap", "sortable": false, "render": (data, type, row, meta) => {
+                        return `
+                        <input type="checkbox"
+                        onchange="seleccionItem(this, ${row.codigo})" 
+                        ${(estaTodoSeleccionado || arreglo.includes(row.codigo))  ? "checked" : ""}>
+                        `;
+                    }
+                },
+                { "className": "text-nowrap", "render": (data, type, row, meta) => row.codigo },
+                { "className": "text-nowrap", "render": (data, type, row, meta) => row.nombre }
+            ],
+            order: [[1, 'desc']]    // Ordena por codigo
+        });
+    }
+
+    function seleccionItem(checkbox, codigo)
+    {
+        if (checkbox.checked)
+            arreglo.push(codigo);
+        else {
+            arreglo = arreglo.filter(x => x != codigo);
+            document.querySelectorAll("[name='seleccionarTodo']")[0].checked = false;
+            estaTodoSeleccionado = false;
+        }
+
+        console.log(arreglo);
+    }
+
+    function seleccionarTodo(e)
+    {
+        Array.from(document.querySelectorAll("#TablaResultados input[type='checkbox']")).filter(x => x.name !== "seleccionarTodo")
+        .forEach(x => {  
+            x.checked = e.checked;
+        });
+
+        if (e.checked) {
+            estaTodoSeleccionado = true;
+        }
+        else {
+            arreglo = [];
+            estaTodoSeleccionado = false;
+        }
+    }
 
     function showLoading() {
 

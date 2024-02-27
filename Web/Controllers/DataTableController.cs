@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
+using Web.Dto;
 
 namespace Web.Controllers
 {
@@ -14,7 +15,7 @@ namespace Web.Controllers
             // Así, la inicialización de datos se realiza solo una sola vez durante el ciclo de vida de la aplicación
             lista = new List<Probando>();
 
-            Enumerable.Range(1, 50).ToList().ForEach(numero => {
+            Enumerable.Range(1, 55).ToList().ForEach(numero => {
                 lista.Add(new Probando { codigo = numero, nombre = $"Nombre {numero}" });
             });
         }
@@ -28,19 +29,30 @@ namespace Web.Controllers
         public ActionResult ObtenerDatos(int start, int length)
         {
             var draw = Request.Form.GetValues("draw").FirstOrDefault();
-            int page = (start / length) + 1;    // Calcular la página actual
-            int pageSize = length;              // Tamaño de la página
+            int totalRecords = 0;
+            var retorno = new List<Probando>();
 
-            string filtro = Request.Form.GetValues("search[value]").FirstOrDefault();  // Obtener el filtro de búsqueda por nombre
+            if (length != -1)  // Si es distinto de traer todo
+            {
+                int page = (start / length) + 1;    // Calcular la página actual
+                int pageSize = length;              // Tamaño de la página
 
-            var datosFiltrados = string.IsNullOrEmpty(filtro)
-                ? lista                                                     // Si no hay filtro, usar todos los datos
-                : lista.Where(d => d.nombre.Contains(filtro)).ToList();     // Filtrar por nombre
+                string filtro = Request.Form.GetValues("search[value]").FirstOrDefault();  // Obtener el filtro de búsqueda por nombre
 
-            int totalRecords = datosFiltrados.Count;    // Número total de registros después de aplicar el filtro
-            int offset = (page - 1) * pageSize;         // Cálculo del offset
+                var datosFiltrados = string.IsNullOrEmpty(filtro)
+                    ? lista                                                     // Si no hay filtro, usar todos los datos
+                    : lista.Where(d => d.nombre.Contains(filtro)).ToList();     // Filtrar por nombre
 
-            var retorno = datosFiltrados.Skip(offset).Take(pageSize).ToList();
+                totalRecords = datosFiltrados.Count;    // Número total de registros después de aplicar el filtro
+                int offset = (page - 1) * pageSize;         // Cálculo del offset
+
+                retorno = datosFiltrados.Skip(offset).Take(pageSize).ToList();
+            }
+            else
+            {
+                retorno = lista;
+                totalRecords = lista.Count;
+            }
 
             return Json(new Grilla()
             {
@@ -51,27 +63,11 @@ namespace Web.Controllers
             });
         }
 
-
         public class Probando
         {
             public int codigo { get; set; }
             public string nombre { get; set; }
         }
 
-        public class Grilla
-        {
-            public string draw { get; set; }
-            public decimal recordsFiltered { get; set; }
-            public decimal recordsTotal { get; set; }
-            public object data { get; set; }
-
-            public Grilla()
-            {
-                draw = "";
-                recordsFiltered = 0;
-                recordsTotal = 0;
-                data = new List<object>();
-            }
-        }
     }
 }
