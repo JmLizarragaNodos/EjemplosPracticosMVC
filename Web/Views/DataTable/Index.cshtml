@@ -1,0 +1,105 @@
+﻿
+<div class="card">
+
+    <div class="card-header">
+        <div class="row">
+            <div class="col-12 d-flex align-items-end justify-content-between">
+                <h4 class="float-left heading h4-responsive mb-0">Probando DataTable</h4>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+
+        <div class="row mb-4 mt2 info">
+            <div class="col-12">
+                <br />
+
+                <table id="TablaResultados" class="datatables table table-hover table-striped table-bordered m-0" width="100%">
+                    <thead>
+                        <tr>
+                            <th>N&deg;</th>
+                            <th>NOMBRE</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+    <div class="card-footer">
+        <div class="row py-2 flex-row">
+
+            <div class="col col-md-6  d-flex justify-content-start">
+
+            </div>
+            <div class="col col-md-6 d-flex justify-content-end">
+
+                <button type="button" class="btn btn-primary">
+                    <span>Probando</span>
+                </button>
+
+                <button type="button" class="btn btn-secondary">
+                    <span>Probando</span>
+                </button>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+
+    let oTable = $("#TablaResultados").DataTable({
+        dom: '<"top top-grey"<"dataTables_actions"f>> <t> <"bottom mt-2 d-flex align-items-center justify-content-between flex-wrap"<"d-flex" il>p>',
+        scrollY: "60vh",
+        scrollX: true,
+        lengthMenu: [[10, 20, 30, 50, -1], [10, 20, 30, 50, "Todas"]],
+        aaSorting: [],
+        processing: true,             // for show progress bar
+        serverSide: true,             // for process server side
+        filter: true,                 // this is for disable filter (search box)
+        orderMulti: false,            // for disable multiple column at once
+        initComplete: () =>
+        {
+            var input = $('.dataTables_filter input');
+            var wait = null;
+            input.unbind().bind('keyup', () => {
+                clearTimeout(wait);
+                wait = setTimeout(() => {
+                    oTable.search(input.val()).draw();
+                }, 500); // Retraso de 500 milisegundos antes de realizar la búsqueda
+            });
+        },
+        ajax: {
+          url: "@Url.Action("ObtenerDatos", "DataTable")",
+          type: "post",
+          datatype: "json",
+          beforeSend: () => {
+            showLoading();
+          },
+          error: () => {
+            alert("Se encontró un error al realizar la consulta");
+          },
+          complete: () => {
+            hideLoading();
+          }
+      },
+      columns: [
+          { "className": "text-nowrap", "render": (data, type, row, meta) => row.codigo },
+          { "className": "text-nowrap", "render": (data, type, row, meta) => row.nombre }
+      ],
+      order: [[1, 'desc']]    // Ordena por codigo
+    });
+
+    function showLoading() {
+
+    }
+
+    function hideLoading() {
+
+    }
+
+</script>
