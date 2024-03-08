@@ -25,10 +25,12 @@ namespace Web.Controllers
             return View();
         }
 
-        [HttpPost]
-        public ActionResult ObtenerDatos(int start, int length)
+        //[HttpPost]
+        public ActionResult ObtenerDatos(int start, int length)   // https://localhost:44353/DataTable/ObtenerDatos?start=0&length=10
         {
-            var draw = Request.Form.GetValues("draw").FirstOrDefault();
+            var draw = (Request.Form.GetValues("draw") != null) ?
+                Request.Form.GetValues("draw").FirstOrDefault() : null;
+
             int totalRecords = 0;
             var retorno = new List<Probando>();
 
@@ -37,7 +39,7 @@ namespace Web.Controllers
                 int page = (start / length) + 1;    // Calcular la página actual
                 int pageSize = length;              // Tamaño de la página
 
-                string filtro = Request.Form.GetValues("search[value]").FirstOrDefault();  // Obtener el filtro de búsqueda por nombre
+                var filtro = (Request.Form.GetValues("search[value]") != null) ? Request.Form.GetValues("search[value]").FirstOrDefault() : null;
 
                 var datosFiltrados = string.IsNullOrEmpty(filtro)
                     ? lista                                                     // Si no hay filtro, usar todos los datos
@@ -60,7 +62,7 @@ namespace Web.Controllers
                 recordsFiltered = totalRecords,
                 recordsTotal = totalRecords,
                 data = retorno
-            });
+            }, JsonRequestBehavior.AllowGet);
         }
 
         public class Probando
