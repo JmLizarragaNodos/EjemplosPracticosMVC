@@ -177,6 +177,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Controllers\DataTableComplejoController.cs" />
     <Compile Include="Controllers\DataTableController.cs" />
     <Compile Include="Controllers\EjemploCheckboxController.cs" />
     <Compile Include="Controllers\EjemploDescargaCsvController.cs" />
@@ -204,6 +205,7 @@
     <Content Include="Views\EjemploDescargaExcel\Index.cshtml" />
     <Content Include="Views\EjemploDescargaCsv\Index.cshtml" />
     <Content Include="Views\DataTable\Index.cshtml" />
+    <Content Include="Views\DataTableComplejo\Index.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
