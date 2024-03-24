@@ -71,29 +71,35 @@ namespace Web.Controllers
         public ActionResult TraerSeleccionados(bool p_todas, string p_codigos) 
         {
             var res = new RespuestaBackend();
-            var elementosSeleccionados = new List<Probando>(); ;
+            var elementosSeleccionados = new List<Probando>();
+            var cadenaSQL = "";
 
             try
             {
                 if (p_todas && string.IsNullOrEmpty(p_codigos))  // Si seleccionó todo
                 {
                     elementosSeleccionados = _lista;
+                    cadenaSQL = "UPDATE tu_tabla SET seleccionado = 1; <br/>";
                 }
                 else
                 {
+                    cadenaSQL = "UPDATE tu_tabla SET seleccionado = 0; <br/><br/>";
+
                     List<int> listaNumeros = p_codigos.Split(',').Select(int.Parse).ToList();
 
                     if (p_todas && !string.IsNullOrEmpty(p_codigos))  // Si seleccionó todo, pero se removió algunos
                     {
                         elementosSeleccionados = _lista.Where(x => !listaNumeros.Contains(x.codigo)).ToList();
+                        cadenaSQL += $"UPDATE tu_tabla SET seleccionado = 1 WHERE codigo NOT IN ({p_codigos}); <br/>";
                     }
                     else if (!p_todas && !string.IsNullOrEmpty(p_codigos))  // Si seleccionó solo algunas
                     {
                         elementosSeleccionados = _lista.Where(x => listaNumeros.Contains(x.codigo)).ToList();
+                        cadenaSQL += $"UPDATE tu_tabla SET seleccionado = 1 WHERE codigo IN ({p_codigos}); <br/>";
                     }
                 }
 
-                res.objeto = elementosSeleccionados;
+                res.objeto = new { elementosSeleccionados, cadenaSQL };
             }
             catch (Exception ex)
             {
