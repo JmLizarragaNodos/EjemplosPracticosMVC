@@ -15,7 +15,7 @@ namespace Web.Controllers
             // Así, la inicialización de datos se realiza solo una sola vez durante el ciclo de vida de la aplicación
             lista = new List<Probando>();
 
-            Enumerable.Range(1, 55).ToList().ForEach(numero => {
+            Enumerable.Range(1, 21).ToList().ForEach(numero => {
                 lista.Add(new Probando { codigo = numero, nombre = $"Nombre {numero}" });
             });
         }

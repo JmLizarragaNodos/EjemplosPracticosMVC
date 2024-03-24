@@ -18,7 +18,13 @@
                     <thead>
                         <tr>
                             <th>
-                                <input type="checkbox" name="seleccionarTodo" onchange="seleccionarTodo(this)" />
+                                <fieldset class="form-check">
+                                    <input class="form-check-input table-check" type="checkbox" name="seleccionarTodo"
+                                    onchange="seleccionarTodo(event)"
+                                    id="checkbox_TablaResultados_SeleccionarTodo">
+
+                                    <label class="form-check-label" for="checkbox_TablaResultados_SeleccionarTodo"></label>
+                                </fieldset>
                             </th>
                             <th>N&deg;</th>
                             <th>NOMBRE</th>
@@ -39,8 +45,8 @@
             </div>
             <div class="col col-md-6 d-flex justify-content-end">
 
-                <button type="button" class="btn btn-primary">
-                    <span>Probando</span>
+                <button type="button" onclick="imprimirSeleccionados()" class="btn btn-primary">
+                    <span>Imprimir Seleccionados</span>
                 </button>
 
                 <button type="button" class="btn btn-secondary">
@@ -55,12 +61,13 @@
 
 <script>
 
-    let arreglo = [];
-    let estaTodoSeleccionado = false;
+    this.arregloCheckbox = [];                   // public arregloCheckbox: Array<string> = [];
+    this.estaTodoSeleccionadoCheckbox = false;   // public estaTodoSeleccionadoCheckbox: boolean = false;
 
-    (() => {
-        desplegarGrilla(true);
-    })();
+    $(document).ready(function() 
+    {
+        desplegarGrilla();
+    });
 
     function desplegarGrilla(cargaInicial = false)
     {
@@ -77,14 +84,12 @@
             orderMulti: false,            // for disable multiple column at once
             initComplete: () =>
             {
-                    var input = $('.dataTables_filter input');
-                    var wait = null;
-                    input.unbind().bind('keyup', () => {
-                        clearTimeout(wait);
-                        wait = setTimeout(() => {
-                            oTable.search(input.val()).draw();
-                        }, 500); // Retraso de 500 milisegundos antes de realizar la búsqueda
-                    });
+                let input = $("#TablaResultados_wrapper input[type='search']");
+                let wait = null;
+                input.unbind().bind("keyup", () => {
+                    clearTimeout(wait);
+                    wait = setTimeout(() => oTable.search(input.val()).draw(), 500);   // Retraso de 500 milisegundos antes de realizar la búsqueda
+                });
             },
             ajax: {
                   url: "@Url.Action("ObtenerDatos", "DataTableComplejo")",
@@ -120,14 +125,24 @@
                   }
             },
             columns: [
-                {
-                    "className": "text-nowrap", "sortable": false, "render": (data, type, row, meta) => {
-                        return `
-                        <input type="checkbox"
-                        onchange="seleccionItem(this, ${row.codigo})"
-                        ${(estaTodoSeleccionado || arreglo.includes(row.codigo))  ? "checked" : ""}>
-                        `;
-                    }
+                { 
+                  "className": "text-nowrap", "sortable": false, "render": (data, type, row, meta) => 
+                  {
+                    let checked = (
+                        (!this.estaTodoSeleccionadoCheckbox && this.arregloCheckbox.includes(row.codigo)) ||
+                        (this.estaTodoSeleccionadoCheckbox && !this.arregloCheckbox.includes(row.codigo))
+                    ) 
+                    ? "checked" : "";
+
+                    return `
+                    <fieldset class="form-check">
+                        <input class="form-check-input table-check" type="checkbox" 
+                        onchange="seleccionItem(event, ${row.codigo})"
+                        id="checkbox_TablaResultados_${row.codigo}" ${checked}>
+
+                        <label class="form-check-label" for="checkbox_TablaResultados_${row.codigo}"></label>
+                    </fieldset>`;
+                  } 
                 },
                 { "className": "text-nowrap", "render": (data, type, row, meta) => row.codigo },
                 { "className": "text-nowrap", "render": (data, type, row, meta) => row.nombre }
@@ -136,33 +151,109 @@
         });
     }
 
-    function seleccionItem(checkbox, codigo)
-    {
-        if (checkbox.checked)
-            arreglo.push(codigo);
-        else {
-            arreglo = arreglo.filter(x => x != codigo);
-            document.querySelectorAll("[name='seleccionarTodo']")[0].checked = false;
-            estaTodoSeleccionado = false;
-        }
-
-        console.log(arreglo);
-    }
-
-    function seleccionarTodo(e)
+    function seleccionarTodo(evento)
     {
         Array.from(document.querySelectorAll("#TablaResultados input[type='checkbox']")).filter(x => x.name !== "seleccionarTodo")
-        .forEach(x => {
-            x.checked = e.checked;
-        });
+            .forEach(x => {
+                x.checked = evento.target.checked;
+            });
 
-        if (e.checked) {
-            estaTodoSeleccionado = true;
+        this.estaTodoSeleccionadoCheckbox = evento.target.checked;
+        this.arregloCheckbox = [];  // Tanto si selecciona todo, o remueve todo, quita los elementos seleccionados
+
+        console.log("this.estaTodoSeleccionado", this.estaTodoSeleccionadoCheckbox);
+    }
+
+    function seleccionItem(evento, codigo)
+    {
+        let checkSeleccionarTodo = document.querySelector(`#checkbox_TablaResultados_SeleccionarTodo`);
+
+        if (evento.target.checked)
+        {
+            if (!this.estaTodoSeleccionadoCheckbox)
+                this.arregloCheckbox.push(codigo);
+            else
+            {
+                this.arregloCheckbox = this.arregloCheckbox.filter(x => x != codigo);
+
+                if (this.arregloCheckbox.length == 0)
+                    checkSeleccionarTodo.checked = true;
+            }
+        }
+        else
+        {
+            if (!this.estaTodoSeleccionadoCheckbox)
+                this.arregloCheckbox = this.arregloCheckbox.filter(x => x != codigo);
+            else
+                this.arregloCheckbox.push(codigo);
+
+            checkSeleccionarTodo.checked = false;
+        }
+
+        let totalRegistros = $("#TablaResultados").DataTable().page.info().recordsTotal;
+
+        if (this.arregloCheckbox.length == totalRegistros)
+        {
+            checkSeleccionarTodo.checked = !this.estaTodoSeleccionadoCheckbox;
+            this.estaTodoSeleccionadoCheckbox = !this.estaTodoSeleccionadoCheckbox;
+            this.arregloCheckbox = [];
+            console.log(`Se alcanzó el total de registros | this.arregloCheckbox = ${JSON.stringify(this.arregloCheckbox)} | this.estaTodoSeleccionadoCheckbox = ${this.estaTodoSeleccionadoCheckbox}`);
         }
         else {
-            arreglo = [];
-            estaTodoSeleccionado = false;
+            console.log(`this.arregloCheckbox = ${JSON.stringify(this.arregloCheckbox)} | this.estaTodoSeleccionadoCheckbox = ${this.estaTodoSeleccionadoCheckbox}`);
         }
+    }
+
+    async function imprimirSeleccionados()
+    {
+        if (this.arregloCheckbox.length == 0 && !this.estaTodoSeleccionadoCheckbox) {
+            return alert("Es necesario seleccionar al menos un elemento");
+        }
+
+        let queryString = `p_todas=${this.estaTodoSeleccionadoCheckbox}&p_codigos=${this.arregloCheckbox.join(",")}`;
+
+        showLoading();
+
+        try {
+            let res = await obtenerDatos({
+                url: `@Url.Action("TraerSeleccionados", "DataTableComplejo")`,
+                queryString
+            });
+
+            console.log(res);
+        }
+        catch (ex) {
+            console.log(ex);
+        }
+        finally { hideLoading() }
+    }
+
+    function obtenerDatos(datos)
+    {
+        return new Promise((resolve, reject) =>
+        {
+            fetch(datos.url, {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: datos.queryString,
+            })
+            .then(response =>
+            {
+                if (response.ok)
+                {
+                    response.json().then(res =>
+                    {
+                        if (res.status == 200)
+                            resolve(res.objeto);
+                        else
+                            reject(res);
+                    });
+                }
+            })
+            .catch(error => {
+                reject("Ocurrió un error al obtener la información");
+            });
+        });
     }
 
     function showLoading() {

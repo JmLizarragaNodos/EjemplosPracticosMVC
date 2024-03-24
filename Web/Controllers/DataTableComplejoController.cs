@@ -15,7 +15,7 @@ namespace Web.Controllers
             // Así, la inicialización de datos se realiza solo una sola vez durante el ciclo de vida de la aplicación
             _lista = new List<Probando>();
 
-            Enumerable.Range(1, 55).ToList().ForEach(numero => {
+            Enumerable.Range(1, 15).ToList().ForEach(numero => {
                 _lista.Add(new Probando { codigo = numero, nombre = $"Nombre {numero}" });
             });
         }
@@ -66,6 +66,41 @@ namespace Web.Controllers
             var retorno = new { listaNumeros, INFO_TABLA = new { draw = draw, totalRegistros, data = datosGrilla } };
 
             return Json(retorno, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult TraerSeleccionados(bool p_todas, string p_codigos) 
+        {
+            var res = new RespuestaBackend();
+            var elementosSeleccionados = new List<Probando>(); ;
+
+            try
+            {
+                if (p_todas && string.IsNullOrEmpty(p_codigos))  // Si seleccionó todo
+                {
+                    elementosSeleccionados = _lista;
+                }
+                else
+                {
+                    List<int> listaNumeros = p_codigos.Split(',').Select(int.Parse).ToList();
+
+                    if (p_todas && !string.IsNullOrEmpty(p_codigos))  // Si seleccionó todo, pero se removió algunos
+                    {
+                        elementosSeleccionados = _lista.Where(x => !listaNumeros.Contains(x.codigo)).ToList();
+                    }
+                    else if (!p_todas && !string.IsNullOrEmpty(p_codigos))  // Si seleccionó solo algunas
+                    {
+                        elementosSeleccionados = _lista.Where(x => listaNumeros.Contains(x.codigo)).ToList();
+                    }
+                }
+
+                res.objeto = elementosSeleccionados;
+            }
+            catch (Exception ex)
+            {
+                res.AgregarInternalServerError(ex.Message);
+            }
+
+            return Json(res, JsonRequestBehavior.AllowGet);
         }
 
         public class Probando
