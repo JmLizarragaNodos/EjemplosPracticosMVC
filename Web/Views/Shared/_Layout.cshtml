@@ -48,17 +48,26 @@
                     <li class="nav-item">
                         <a class="nav-link" href="@Url.Action("Index", "EjemploCheckbox")">Ejemplo Checkbox</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="@Url.Action("Index", "EjemploDescargaExcel")">Descarga Excel</a>
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Descarga Archivos
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="@Url.Action("Index", "EjemploDescargaExcel")">Excel</a></li>
+                            <li><a class="dropdown-item" href="@Url.Action("Index", "EjemploDescargaCsv")">Csv</a></li>
+                        </ul>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="@Url.Action("Index", "EjemploDescargaCsv")">Descarga Csv</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="@Url.Action("Index", "DataTable")">DataTable</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="@Url.Action("Index", "DataTableComplejo")">DataTableComplejo</a>
+
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            DataTable
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="@Url.Action("Index", "DataTable")">Simple</a></li>
+                            <li><a class="dropdown-item" href="@Url.Action("Index", "DataTableComplejo")">Complejo</a></li>
+                        </ul>
                     </li>
                 </ul>
             </div>
@@ -70,6 +79,76 @@
         @RenderBody()
     </div>
 
-</body>
+    <script>
 
+        function llenarSelect(datos)
+        {
+            // llenarSelect({ querySelector: "#modalAtributo [name='tagHtml']", data: [{ codigo: "1", descripcion: "1" }], selectedValue: 1 });
+
+            const retornoEvento = () => {
+                let res = { ...datos };
+                res.value = $(datos.querySelector).val();
+                res.text = $(`${datos.querySelector} option:selected`).text();
+                return res;
+            };
+
+            if (Array.from($(datos.querySelector + ' option[value!=""]')).length)   // Si tiene elementos excepto el seleccione
+                limpiarSelect(datos.querySelector);                              // Esto sirve al refrescar el combobox con nuevos datos
+
+            quitarSeleccionSelect(datos.querySelector);
+
+            if (datos.data != null)
+            {
+                if (datos.selectedValue == null)
+                {
+                    datos.data.forEach(c => {
+                        $(datos.querySelector).append('<option value="' + c.codigo + '">' + c.descripcion + '</option>');
+                    });
+                }
+                else
+                {
+                    if (Array.isArray(datos.selectedValue))
+                    {
+                        var arreglo = datos.selectedValue;
+
+                        datos.data.forEach(c => {
+                            let selected = (arreglo.includes(c.codigo.toString())) ? "selected" : "";
+                            $(datos.querySelector).append('<option value="' + c.codigo + '" ' + selected + '>' + c.descripcion + '</option>');
+                        });
+                    }
+                    else {
+                        datos.data.forEach(c => {
+                            let selected = (c.codigo == datos.selectedValue) ? "selected" : "";
+                            $(datos.querySelector).append('<option value="' + c.codigo + '" ' + selected + '>' + c.descripcion + '</option>');
+                        });
+                    }
+                }
+
+            }
+
+            $(datos.querySelector).on("change", () =>
+            {
+                if (datos.onchange != null && typeof datos.onchange === "function") {
+                    let retorno = retornoEvento();  // { value: "1234", text: "Hola" }
+                    datos.onchange(retorno);
+                }
+            });
+
+            //$(datos.querySelector).trigger("chosen:updated");   // El select toma los cambios realizados  (MDBOOTSTRAP)
+        }
+
+        function quitarSeleccionSelect(querySelector) 
+        {
+	        $(querySelector).find('option:first-child').prop('selected', true).end();
+            //$(querySelector).find('option:first-child').prop('selected', true).end().trigger('chosen:updated');   // (MDBOOTSTRAP)
+        }
+
+        function limpiarSelect(querySelector) {
+            $(querySelector + ' option[value!=""]').remove().end();     // Remueve todos los options excepto el seleccione
+            // $(querySelector).trigger("chosen:updated");              // (MDBOOTSTRAP)
+        }
+
+    </script>
+
+</body>
 </html>

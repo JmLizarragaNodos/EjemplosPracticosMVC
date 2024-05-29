@@ -11,6 +11,16 @@
     <div class="card-body">
 
         <div class="row mb-4 mt2 info">
+
+            <div class="col-12 col-md-3 mb-3 campo-atributo">
+                <div class="form-group">
+                    <label>Seleccionar</label>
+                    <select id="pruebaSelect" class="form-control">
+                        <option value="">- Seleccione -</option>
+                    </select>
+                </div>
+            </div>
+
             <div class="col-12">
                 <br />
 
@@ -79,8 +89,14 @@
 
     $(document).ready(function()
     {
-        desplegarGrilla();
+        desplegarGrilla(true);
     });
+
+    function resetearSeleccionCheckbox() {
+        this.arregloCheckbox = [];
+        this.estaTodoSeleccionadoCheckbox = false;
+        document.querySelector("#checkbox_TablaResultados_SeleccionarTodo").checked = false;
+    }
 
     function desplegarGrilla(cargaInicial = false)
     {
@@ -110,14 +126,26 @@
                   datatype: "json",
                   data: x =>
                   {
-                      x.cualquierCosa = 0;
+                      x.pruebaSelect = $("#pruebaSelect").val();
                       x.cargaInicial = cargaInicial;
                   },
-                  dataFilter: function (data) {
+                  dataFilter: (data) =>
+                  {
+                      let json = JSON.parse(data);
 
-                      var json = jQuery.parseJSON(data);
+                      if (cargaInicial && Array.isArray(json.cboProbando))
+                      {
+                          llenarSelect({
+                              querySelector: "#pruebaSelect",
+                              data: json.cboProbando,
+                              onchange: () => {
+                                  resetearSeleccionCheckbox();
+                                  desplegarGrilla();
+                              }
+                          });
+                      }
 
-                      var retorno = {
+                      let retorno = {
                           draw: json.INFO_TABLA.draw,
                           recordsFiltered: json.INFO_TABLA.totalRegistros,
                           recordsTotal: json.INFO_TABLA.totalRegistros,

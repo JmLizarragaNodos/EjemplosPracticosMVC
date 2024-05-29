@@ -25,14 +25,14 @@ namespace Web.Controllers
             return View();
         }
 
-        //[HttpPost]
-        public ActionResult ObtenerDatos(int start, int length, bool cargaInicial)   // https://localhost:44353/DataTableComplejo/ObtenerDatos?start=0&length=10?cargaInicial=true
+        [HttpPost]
+        public ActionResult ObtenerDatos(int start, int length, string pruebaSelect, bool cargaInicial)
         {
-            var listaNumeros = new List<int>();
+            var cboProbando = new List<object>();
 
             if (cargaInicial)
             {
-                listaNumeros = new List<int>() { 1, 2, 3, 4 };
+                cboProbando = new List<int> { 1, 2, 3, 4 }.Select(x => new { codigo = x, descripcion = x }).Cast<object>().ToList();
             }
 
             var draw = (Request.Form.GetValues("draw") != null) ?
@@ -48,14 +48,18 @@ namespace Web.Controllers
 
                 var filtro = (Request.Form.GetValues("search[value]") != null) ? Request.Form.GetValues("search[value]").FirstOrDefault() : null;
 
-                var datosFiltrados = string.IsNullOrEmpty(filtro)
-                    ? _lista                                                     // Si no hay filtro, usar todos los datos
-                    : _lista.Where(d => d.nombre.Contains(filtro)).ToList();     // Filtrar por nombre
+                var query = _lista.AsQueryable();
 
-                totalRegistros = datosFiltrados.Count;    // Número total de registros después de aplicar el filtro
+                if (!string.IsNullOrEmpty(filtro))
+                    query = query.Where(d => d.nombre.Contains(filtro));
+
+                if (!string.IsNullOrEmpty(pruebaSelect))
+                    query = query.Where(d => d.codigo == int.Parse(pruebaSelect));
+
+                totalRegistros = query.Count();      // Número total de registros después de aplicar el filtro
                 int offset = (page - 1) * pageSize;         // Cálculo del offset
 
-                datosGrilla = datosFiltrados.Skip(offset).Take(pageSize).ToList();
+                datosGrilla = query.Skip(offset).Take(pageSize).ToList();
             }
             else
             {
@@ -63,9 +67,7 @@ namespace Web.Controllers
                 totalRegistros = _lista.Count;
             }
 
-            var retorno = new { listaNumeros, INFO_TABLA = new { draw = draw, totalRegistros, data = datosGrilla } };
-
-            return Json(retorno, JsonRequestBehavior.AllowGet);
+            return Json(new { cboProbando, INFO_TABLA = new { draw = draw, totalRegistros, data = datosGrilla } });
         }
 
         public ActionResult TraerSeleccionados(bool p_todas, string p_codigos) 

@@ -39,11 +39,16 @@ namespace Web.Controllers
         [HttpPost]
         public ActionResult ObtenerDatosSelect2(string search, int pageSize, int page)
         {
-            int offset = (page - 1) * pageSize;       // Cálculo del offset
-            var dt = datos.Skip(offset).Take(pageSize).ToList();
+            var query = datos.AsQueryable();
 
-            int cantidadDatosCursor = dt.Count;
-            bool traerMasRegistros = (cantidadDatosCursor > 0 && cantidadDatosCursor == pageSize);
+            if (!string.IsNullOrEmpty(search))
+                query = query.Where(d => d.nombre.Contains(search));
+
+            int totalCount = query.Count();
+            int offset = (page - 1) * pageSize;
+            var dt = query.Skip(offset).Take(pageSize).ToList();
+
+            bool traerMasRegistros = (dt.Count > 0 && dt.Count == pageSize);
             var retorno = new Select2(traerMasRegistros);
 
             foreach (Probando x in dt)

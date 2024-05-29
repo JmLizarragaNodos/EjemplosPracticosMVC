@@ -25,8 +25,8 @@ namespace Web.Controllers
             return View();
         }
 
-        //[HttpPost]
-        public ActionResult ObtenerDatos(int start, int length)   // https://localhost:44353/DataTable/ObtenerDatos?start=0&length=10
+        [HttpPost]
+        public ActionResult ObtenerDatos(int start, int length)
         {
             var draw = (Request.Form.GetValues("draw") != null) ?
                 Request.Form.GetValues("draw").FirstOrDefault() : null;
@@ -41,14 +41,15 @@ namespace Web.Controllers
 
                 var filtro = (Request.Form.GetValues("search[value]") != null) ? Request.Form.GetValues("search[value]").FirstOrDefault() : null;
 
-                var datosFiltrados = string.IsNullOrEmpty(filtro)
-                    ? lista                                                     // Si no hay filtro, usar todos los datos
-                    : lista.Where(d => d.nombre.Contains(filtro)).ToList();     // Filtrar por nombre
+                var query = lista.AsQueryable();
 
-                totalRecords = datosFiltrados.Count;    // Número total de registros después de aplicar el filtro
-                int offset = (page - 1) * pageSize;         // Cálculo del offset
+                if (!string.IsNullOrEmpty(filtro))
+                    query = query.Where(d => d.nombre.Contains(filtro));
 
-                retorno = datosFiltrados.Skip(offset).Take(pageSize).ToList();
+                totalRecords = query.Count();           // Número total de registros después de aplicar el filtro
+                int offset = (page - 1) * pageSize;     // Cálculo del offset
+
+                retorno = query.Skip(offset).Take(pageSize).ToList();
             }
             else
             {
@@ -62,7 +63,7 @@ namespace Web.Controllers
                 recordsFiltered = totalRecords,
                 recordsTotal = totalRecords,
                 data = retorno
-            }, JsonRequestBehavior.AllowGet);
+            });
         }
 
         public class Probando
