@@ -69,6 +69,10 @@
                             <li><a class="dropdown-item" href="@Url.Action("Index", "DataTableComplejo")">Complejo</a></li>
                         </ul>
                     </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Index", "SubirExcel")">Subir Excel</a>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -80,6 +84,12 @@
     </div>
 
     <script>
+
+        function validarNuloVacio(contenido)
+        {
+            if (contenido == null || contenido == "") return false;
+            return true;
+        }
 
         function llenarSelect(datos)
         {

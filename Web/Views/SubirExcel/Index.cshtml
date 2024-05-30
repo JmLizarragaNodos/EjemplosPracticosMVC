@@ -1,0 +1,195 @@
+﻿
+<div id="contenedor" class="container mt-5">
+    <h2>Subir Archivo</h2>
+
+    <div class="mb-3">
+        <label for="fileInput" class="form-label">Seleccione un archivo</label>
+        <input class="form-control" type="file" id="fileInput" name="archivo" required>
+    </div>
+    <button type="button" onclick="descargarEjemplo()" class="btn btn-success">Descargar Ejemplo</button>
+    <button type="button" onclick="enviar()" class="btn btn-primary">Enviar</button>
+ 
+</div>
+
+<div id="ModalColumnasNoCoincidentes" class="modal fade in" data-backdrop="static" data-keyboard="false" style="overflow-y: scroll;" role="dialog">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 name="titulo" class="modal-title"></h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <ul>
+                            <li style="color: red">Nombre Columna Incorrecto</li>
+                            <li style="color: #868383">Columna Inexistente en el Archivo</li>
+                            <li style="color: #4caf50">Correcto</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+
+                        <br />
+
+                        <div class="table-responsive" style="min-height: 5em; max-height: 300px; overflow-y: auto;">
+                            <table name="tabla" class="table table-hover table-striped table-bordered m-0">
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="ModalXML" class="modal fade in" data-backdrop="static" data-keyboard="false" style="overflow-y: scroll;" role="dialog">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Xml</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div name="contenido"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    async function enviar()
+    {
+        const fileInput = document.querySelector("#contenedor [name='archivo']");
+        const file = fileInput.files[0];
+
+        if (!file) {
+            alert("Por favor, seleccione un archivo antes de enviar.");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("archivo", file);
+
+        fetch("@Url.Action("Subir", "SubirExcel")", {
+	        method: "POST",
+            body: formData,
+        })
+        .then(response =>
+        {
+	        if (response.ok)
+	        {
+		        response.json().then(res =>
+                {
+                    if (res.status == 200)
+                    {
+                        let modal = $("#ModalXML");
+                        modal.find("[name='contenido']").text(res.objeto.p_data);
+                        modal.modal("show");
+                    }
+                    else
+                    {
+                        if (res.status == 400 && Array.isArray(res.informacionExtra))
+                        {
+                            desplegarErroresArchivo(res.informacionExtra);
+                        }
+                        else {
+                            alert(res.errores.join("\n"));
+                        }
+                    }
+		        });
+	        }
+        })
+        .catch(error => {
+	        alert("Se encontró un error");
+        })
+        .finally(() => {
+	        // Código a ejecutar después de la solicitud
+        });
+    }
+
+    function desplegarErroresArchivo(arreglo)
+    {
+        let modal = $("#ModalColumnasNoCoincidentes");
+
+        modal.find("[name='tabla'] tbody").html(`
+            <tr>
+                ${arreglo.map(x =>
+                {
+                    let color = "#4caf50";
+
+                    if (!x.esValido)
+                        color = (validarNuloVacio(x.nombreRecibido)) ? "red" : "#868383";  // Rojo / Gris
+
+                    let contenidoTd = (validarNuloVacio(x.nombreRecibido)) ? x.nombreRecibido : x.nombreEsperado;
+
+                    return `<td class="font-weight-bold text-nowrap" style="color: ${color}">${contenidoTd}</td>`;
+                }).join("")}
+            </tr>
+        `);
+
+        modal.modal("show");
+    }
+
+    function descargarEjemplo()
+    {
+        let url = "@Url.Action("DescargarEjemplo", "SubirExcel")";
+        let fecha = "30-05-2024";
+
+        fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: `fecha=${fecha}`
+        })
+        .then(res =>
+        {
+            if (!res.ok)
+                throw Error(res.statusText);
+
+            const header = res.headers.get("Content-Disposition");
+            const contentType = res.headers.get("content-type");
+
+            if (contentType && contentType.includes("json"))  // Si la respuesta es un error
+            {
+                res.json().then(data => alert(JSON.stringify(data)));
+                return null;
+            }
+
+            const parts = header.split(";");
+            filename = parts[1].split("=")[1].replaceAll("\"", "");
+            return res.blob();
+        })
+        .then(blob =>
+        {
+            if (blob != null)
+            {
+                var url = window.URL.createObjectURL(blob);
+                var a = document.createElement("a");
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            }
+        })
+        .catch(() => alert("Se encontró un error al descargar el archivo csv"))
+        .finally(() => {
+
+        });
+    }
+</script>
+
