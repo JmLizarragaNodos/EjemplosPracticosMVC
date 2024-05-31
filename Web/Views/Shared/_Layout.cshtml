@@ -24,6 +24,44 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.18/css/jquery.dataTables.min.css">
 
     <title>Ejemplos Prácticos</title>
+
+    <style>
+        /* ============================================================================================================ */
+        /* Select 2 */
+
+        /* Establece la altura deseada para el componente Select2 */
+        .select2-container--default .select2-selection--single {
+            height: 38px; /* Puedes ajustar la altura según tus necesidades */
+        }
+
+        /* Establece la altura deseada para las opciones desplegables del Select2 */
+        .select2-container--default .select2-results__option {
+            height: 38px; /* Puedes ajustar la altura según tus necesidades */
+        }
+
+        /* Establece la altura deseada para las opciones seleccionadas del Select2 (múltiple) */
+        .select2-container--default .select2-selection__choice {
+            height: 38px; /* Puedes ajustar la altura según tus necesidades */
+        }
+
+        /* Centrar verticalmente el texto dentro del Select2 */
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            display: flex;
+            align-items: center;
+            height: 100%;
+        }
+
+        /* Ajusta el z-index del menú desplegable de Select2 */
+        .select2-container--default .select2-dropdown--below {
+            z-index: 5000; 
+        }
+
+        .select2-container--default .select2-dropdown--above {
+            z-index: 5000; 
+        }
+
+        /* ============================================================================================================ */
+    </style>
 </head>
 
 <body>
@@ -42,9 +80,17 @@
                     <li class="nav-item">
                         <a class="nav-link" href="@Url.Action("Index", "OpenHtmlToPdf")">OpenHtmlToPdf</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="@Url.Action("Index", "Select2")">Select2</a>
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Select 2
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="@Url.Action("Index", "Select2")">Simple</a></li>
+                            <li><a class="dropdown-item" href="@Url.Action("Index", "Select2Complejo")">Complejo</a></li>
+                        </ul>
                     </li>
+
                     <li class="nav-item">
                         <a class="nav-link" href="@Url.Action("Index", "EjemploCheckbox")">Ejemplo Checkbox</a>
                     </li>

@@ -253,6 +253,7 @@
     <Compile Include="Controllers\EjemploDescargaExcelController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\OpenHtmlToPdfController.cs" />
+    <Compile Include="Controllers\Select2ComplejoController.cs" />
     <Compile Include="Controllers\Select2Controller.cs" />
     <Compile Include="Controllers\SubirExcelController.cs" />
     <Compile Include="Dto\Grilla.cs" />
@@ -284,6 +285,7 @@
     <Content Include="Views\DataTable\Index.cshtml" />
     <Content Include="Views\DataTableComplejo\Index.cshtml" />
     <Content Include="Views\SubirExcel\Index.cshtml" />
+    <Content Include="Views\Select2Complejo\Index.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

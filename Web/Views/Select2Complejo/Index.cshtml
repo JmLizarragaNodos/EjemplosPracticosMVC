@@ -1,0 +1,382 @@
+﻿
+<div id="cardSimple" class="card">
+    <div class="card-header">
+        <div class="row">
+            <div class="col-12 d-flex align-items-end justify-content-between">
+                <h4 class="float-left heading h4-responsive mb-0">Simple</h4>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row">
+
+            <div class="col-12 col-md-3">
+                <div class="form-group">
+                    <label>Región</label>
+                    <select name="region" class="form-control" style="width: 100%"></select>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-3">
+                <div class="form-group">
+                    <label>Provincia</label>
+                    <select name="provincia" class="form-control" style="width: 100%"></select>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-3">
+                <div class="form-group">
+                    <label>Comuna</label>
+                    <select name="comuna" class="form-control" style="width: 100%"></select>
+                </div>
+            </div>
+
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <br /><br /><br /><br /><br /><br /><br />
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="cardMultiple" class="card">
+    <div class="card-header">
+        <div class="row">
+            <div class="col-12 d-flex align-items-end justify-content-between">
+                <h4 class="float-left heading h4-responsive mb-0">Múltiple</h4>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row">
+
+            <div class="col-12 col-md-3">
+                <div class="form-group">
+                    <label>Región</label>
+                    <select name="region" class="form-control" style="width: 100%"></select>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-3">
+                <div class="form-group">
+                    <label>Provincia</label>
+                    <select name="provincia" class="form-control" style="width: 100%"></select>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-3">
+                <div class="form-group">
+                    <label>Comuna</label>
+                    <select name="comuna" class="form-control" style="width: 100%"></select>
+                </div>
+            </div>
+
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <br /><br /><br /><br /><br /><br /><br />
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    //#region Simple 
+
+    llenarSelect2({
+        querySelector: "#cardSimple [name='region']",
+        url: "@Url.Action("ObtenerRegion", "Select2Complejo")",
+        maxlength: 15,
+        placeholder: "Seleccione una Region",
+        registrosPorPagina: 10,
+        onchange: () => {
+            limpiarSelect2("#cardSimple [name='provincia']");
+            limpiarSelect2("#cardSimple [name='comuna']");
+        }
+    });
+
+    llenarSelect2({
+        querySelector: "#cardSimple [name='provincia']",
+        url: "@Url.Action("ObtenerProvincia", "Select2Complejo")",
+        maxlength: 15,
+        placeholder: "Seleccione una Provincia",
+        registrosPorPagina: 10,
+        params: () => ({ codigosRegiones: [$("#cardSimple [name='region']").val()] }),
+        onchange: () => limpiarSelect2("#cardSimple [name='comuna']")
+    });
+
+    llenarSelect2({
+        querySelector: "#cardSimple [name='comuna']",
+        url: "@Url.Action("ObtenerComuna", "Select2Complejo")",
+        maxlength: 15,
+        placeholder: "Seleccione una Comuna",
+        registrosPorPagina: 10,
+        params: () => ({ codigosProvincias: [$("#cardSimple [name='provincia']").val() ] })
+    });
+
+    //#endregion Simple
+
+    
+    //#region Multiple
+
+    llenarSelect2({
+        querySelector: "#cardMultiple [name='region']",
+        multiple: true,
+        url: "@Url.Action("ObtenerRegion", "Select2Complejo")",
+        maxlength: 15,
+        placeholder: "Seleccione una Region",
+        registrosPorPagina: 10,
+        onchange: () => {
+            limpiarSelect2("#cardMultiple [name='provincia']");
+            limpiarSelect2("#cardMultiple [name='comuna']");
+        }
+    });
+
+    llenarSelect2({
+        querySelector: "#cardMultiple [name='provincia']",
+        multiple: true,
+        url: "@Url.Action("ObtenerProvincia", "Select2Complejo")",
+        maxlength: 15,
+        placeholder: "Seleccione una Provincia",
+        registrosPorPagina: 10,
+        params: () => ({ codigosRegiones: $("#cardMultiple [name='region']").val() }),
+        onchange: () => limpiarSelect2("#cardMultiple [name='comuna']")
+    });
+
+    llenarSelect2({
+        querySelector: "#cardMultiple [name='comuna']",
+        multiple: true,
+        url: "@Url.Action("ObtenerComuna", "Select2Complejo")",
+        maxlength: 15,
+        placeholder: "Seleccione una Comuna",
+        registrosPorPagina: 10,
+        params: () => ({ codigosProvincias: $("#cardMultiple [name='provincia']").val() })
+    });
+
+
+    //#endregion Multiple
+
+    function llenarSelect2(datos)
+    {
+        /*
+        llenarSelect2({
+            querySelector: "#select2_asignaturas",
+            url: "DEF_TASIG_MC.aspx/Get_ProgramasFormacionRecomendados_Select2",
+            consultarPorRut: true,
+            maxlength: 15,
+            placeholder: "Seleccione una Asignatura",
+            registrosPorPagina: 5,
+            multiple: true,
+            params: { i_carr_ccod: "T66" },
+            optionsSeleccionados: [
+                { id: "DC0801", text: "DC0801-COMPUTACIÓN APLICADA I" },
+                { id: "DC0802", text: "DC0802-COMPUTACIÓN APLICADA II" },
+                { id: "DC0804", text: "DC0804-COMPUTACIÓN APLICADA III" },
+            ],
+            onclick: () => alert("Click en el select2"),
+            onchange: () => alert("Onchange en el select2"),
+            onblur: () => alert("Onblur en el select2")
+        })
+        */
+
+        if ($(datos.querySelector).data("select2"))
+        {
+            let selector = document.querySelector(datos.querySelector);
+            $(selector).off(); // Elimina todos los posibles eventos asociados al selector
+
+            $(datos.querySelector).empty().trigger("change");   // Limpia posibles options anteriormente seleccionados
+            $(datos.querySelector).select2("destroy");          // Destruye el anterior Select2
+        }
+
+        let esMultiple = (datos.multiple != null && datos.multiple);
+        let querySelectorSinGato = datos.querySelector.split("#").join("");
+        let params = {};
+
+        if (datos.params != null)
+        {
+            if (typeof datos.params === "function")  // Si es una funcion
+                datos.params();
+            else
+            {
+                if (typeof datos.params !== "function")  // Si no es una funcion
+                    params = datos.params
+            }
+        }
+
+        //const obtenerInputBuscador = () =>
+        //{
+        //    if (esMultiple)
+        //        return Array.from($(".select2-search__field")).find(x => x.attributes["aria-describedby"].nodeValue.includes(querySelectorSinGato));
+
+        //    return inputBuscador = Array.from(document.getElementsByClassName("select2-search__field"))
+        //    .find(x => x.attributes["aria-controls"] != null && x.attributes["aria-controls"].nodeValue.includes(querySelectorSinGato));
+        //}
+
+        const retornoEvento = () =>
+        {
+            let res = datos;
+            res.value = $(datos.querySelector).select2("val");
+            res.text = $(`${datos.querySelector} option:last-child`).text();
+
+            return res;
+        }
+
+        $(datos.querySelector).select2({
+            allowClear: true,
+            closeOnSelect: esMultiple ? false : true,  // Si es multiple, no lo cierra al seleccionar un option
+            multiple: esMultiple,
+            placeholder: datos.placeholder ?? "Seleccione",
+            //minimumInputLength: 3,  // Minimo de caracteres para busquedas
+            ajax: {
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                url: datos.url,
+                delay: 700,     // Esperar antes de enviar la petición
+                //beforeSend: () => this.showLoading(),
+                //complete: () => this.hideLoading(),
+                data: (p) =>
+                {
+                    let query = {
+                        search: p.term,
+                        pageSize: datos.registrosPorPagina ?? 10,
+                        page: p.page || 1
+                    };
+
+                    let envio = {...params, ...query};   // A los parametros recibidos le agrega los campos search, pageSize y page
+                    return JSON.stringify(envio);
+                    //return query;
+                },
+                transport: function (params, success, failure)
+                {
+                    if (datos.stop != null) {
+                        let detener = datos.stop();
+                        if (detener == true) return;
+                    }
+
+                    /*
+                    let busqueda = params.data.search;
+                    let inputBuscador = obtenerInputBuscador();
+
+                    if (![null, undefined, ""].includes(busqueda))  // Si el usuario escribió algo en la caja de búsquedas
+                    {
+                        if (datos.consultarPorRut != null && datos.consultarPorRut && ! /^[A-Za-z\s]*$/.test(busqueda))  // Si tiene al menos un caracter que no sea una letra
+                        {
+                            let rutFormateado = formatearRut(busqueda)
+                            inputBuscador.value = rutFormateado;
+
+                            if (
+                                busqueda.split("-").filter(x => x != "").length == 1 ||     // Si no tiene digito verificador
+                                busqueda.length > 15 ||                                     // Si es un rut demasiado grande
+                                ! busqueda.toLowerCase().match(/^[0-9\k\.\-\/]+$/)          // Si no es un rut válido (Sirve con y sin puntos)
+                            )
+                            { return false; }
+
+                            params.data.search = busqueda.replaceAll(".", "");   // Va a buscar al backend el rut sin los puntos
+                        }
+                    }
+                    */
+
+                    var $request = $.ajax(params);
+                    $request.then(success);
+                    $request.fail(failure);
+
+                    return $request;
+                },
+                processResults: (res) =>   // (res: RespuestaBackend<any>)
+                {
+                    if (res != null && res.status != null)
+                    {
+                        if (res.status == 200)
+                        {
+                            return {
+                                results: res.objeto.resultados,
+                                pagination: {
+                                    more: res.objeto.traerMasRegistros
+                                }
+                            };
+                        }
+                        else {
+                            //this.utilidades.mostrarErroresRespuestaBackend(res);
+                            mostrarErrores(res);
+                        }
+                    }
+                    else
+                        return { results: [], pagination: { more: false } };
+                }
+            }
+        })
+        .on("select2:open", () =>
+        {
+            if (datos.params != null && typeof datos.params === "function")
+            {
+                let retorno = retornoEvento();
+                params = datos.params(retorno);
+            }
+
+            if (datos.onclick != null && typeof datos.onclick === "function")
+                datos.onclick();
+
+            //let inputBuscador = obtenerInputBuscador();
+            //inputBuscador.maxLength = datos.maxlength ?? 40;
+        })
+        .on("change", () =>
+        {
+            let retorno = retornoEvento();  // { value: "1234", text: "Hola" }
+
+            if (datos.onchange != null && typeof datos.onchange === "function")
+                datos.onchange(retorno);
+        })
+        .on("select2:close", () =>
+        {
+            let retorno = retornoEvento();  // { value: "1234", text: "Hola" }
+
+            if (datos.onblur != null && typeof datos.onblur === "function")
+                datos.onblur(retorno);
+        });
+
+        //==============================================>>>>>
+
+        if (esMultiple)
+        {
+            if (datos.optionsSeleccionados != null && Array.isArray(datos.optionsSeleccionados))
+            {
+                datos.optionsSeleccionados.forEach(c =>
+                    $(datos.querySelector).append(new Option(c.text, c.id, true, true))
+                );
+
+                //$(datos.querySelector).trigger("change");   // ESTO DISPARA EL EVENTO ONCHANGE
+            }
+        }
+        else
+        {
+            if (datos.value != null)   // Si trae un option seleccionadoy no es múltiple
+            {
+                // datos.value = { id: 1, text: "Probando" };
+
+                if ('id' in datos.value && 'text' in datos.value) {
+                    $(datos.querySelector).append(new Option(datos.value.text, datos.value.id, true, true));
+                }
+                else {
+                    console.log("datos.value no tiene alguna de las propiedades 'id' o 'text'");
+                }
+            }
+        }
+
+        //==============================================>>>>>
+
+    }
+
+    function limpiarSelect2(querySelector)   // Remueve todos los options seleccionados
+    {
+        // limpiarSelect2("#acordeon-niveles-descripcion-editar [name='defProgramaFormativoRecomendado']")
+
+        Array.from($(querySelector)).forEach(x => {
+            $(x).empty().trigger("change");
+        });
+    }
+
+</script>
+
