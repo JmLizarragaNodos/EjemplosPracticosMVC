@@ -25,6 +25,11 @@ namespace Web.Dto
         public string id { get; set; }
         public string text { get; set; }
 
+        public OptionSelect2()
+        {
+         
+        }
+
         public OptionSelect2(string id, string text)
         {
             this.id = id;

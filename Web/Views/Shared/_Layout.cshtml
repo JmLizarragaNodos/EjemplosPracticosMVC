@@ -62,6 +62,35 @@
 
         /* ============================================================================================================ */
     </style>
+    <script>
+        function obtenerDatos(datos)
+        {
+            return new Promise((resolve, reject) =>
+            {
+                fetch(datos.url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: datos.queryString,
+                })
+                .then(response =>
+                {
+                    if (response.ok)
+                    {
+                        response.json().then(res =>
+                        {
+                            if (res.status == 200)
+                                resolve(res.objeto);
+                            else
+                                reject(res);
+                        });
+                    }
+                })
+                .catch(error => {
+                    reject("Ocurrió un error al obtener la información");
+                });
+            });
+        }
+    </script>
 </head>
 
 <body>

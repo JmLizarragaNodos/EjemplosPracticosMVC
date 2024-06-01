@@ -127,5 +127,55 @@ namespace Web.Controllers
 
             return Json(res);
         }
+
+        public ActionResult TraerDatosMultiple()
+        {
+            var res = new RespuestaBackend();
+
+            try
+            {
+                var regiones = _regiones.Where(x => new List<int>() { 3, 6 }.Contains(x.idRegion)).Select(x => new OptionSelect2
+                {
+                    id = x.idRegion.ToString(),
+                    text = x.nombreRegion
+                }).ToList();
+
+                var codigosRegiones = regiones.Select(x => x.id).ToList();
+
+                var provincias = _regiones
+                .Where(region => codigosRegiones.Contains(region.idRegion.ToString()))
+                .SelectMany(region => region.provincias)
+                .Where(x => new List<int>() { 6, 7, 14 }.Contains(x.idProvincia))
+                .Select(x => new OptionSelect2
+                {
+                    id = x.idProvincia.ToString(),
+                    text = x.nombreProvincia
+                })
+                .ToList();
+
+                var codigosProvincias = provincias.Select(x => x.id).ToList();
+
+                var comunas = _regiones
+                .SelectMany(region => region.provincias)
+                .Where(provincia => codigosProvincias.Contains(provincia.idProvincia.ToString()))
+                .SelectMany(provincia => provincia.comunas)
+                .Where(x => new List<int>() { 16, 20, 47, 51 }.Contains(x.idComuna))
+                .Select(x => new OptionSelect2
+                {
+                    id = x.idComuna.ToString(),
+                    text = x.nombreComuna
+                })
+                .ToList(); 
+
+                res.objeto = new { regiones, provincias, comunas };
+            }
+            catch (Exception ex)
+            {
+                res.AgregarInternalServerError(ex.Message);
+            }
+
+            return Json(res, JsonRequestBehavior.AllowGet);
+        }
+
     }
 }

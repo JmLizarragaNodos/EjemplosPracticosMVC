@@ -79,11 +79,33 @@
             </div>
         </div>
     </div>
+    <div class="card-footer">
+        <div class="row py-2 flex-row">
+
+            <div class="col col-md-6  d-flex justify-content-start">
+
+            </div>
+            <div class="col col-md-6 d-flex justify-content-end">
+
+                <button type="button" onclick="traerDatosMultiple()" class="btn btn-primary">
+                    <span>Traer datos múltiple</span>
+                </button>
+
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
 
-    //#region Simple 
+    (() =>
+    {
+        definirSelect2_multiple_region();
+        definirSelect2_multiple_provincia();
+        definirSelect2_multiple_comuna();
+    })();
+
+    //#region Simple
 
     llenarSelect2({
         querySelector: "#cardSimple [name='region']",
@@ -118,45 +140,73 @@
 
     //#endregion Simple
 
-    
+
     //#region Multiple
 
-    llenarSelect2({
-        querySelector: "#cardMultiple [name='region']",
-        multiple: true,
-        url: "@Url.Action("ObtenerRegion", "Select2Complejo")",
-        maxlength: 15,
-        placeholder: "Seleccione una Region",
-        registrosPorPagina: 10,
-        onchange: () => {
-            limpiarSelect2("#cardMultiple [name='provincia']");
-            limpiarSelect2("#cardMultiple [name='comuna']");
-        }
-    });
+    function definirSelect2_multiple_region(optionsSeleccionados = null)
+    {
+        llenarSelect2({
+	        querySelector: "#cardMultiple [name='region']",
+	        multiple: true,
+	        url: "/Select2Complejo/ObtenerRegion",
+	        maxlength: 15,
+	        placeholder: "Seleccione una Region",
+	        registrosPorPagina: 10,
+	        onchange: () => {
+		        limpiarSelect2("#cardMultiple [name='provincia']");
+		        limpiarSelect2("#cardMultiple [name='comuna']");
+	        },
+	        optionsSeleccionados
+        });
+    }
 
-    llenarSelect2({
-        querySelector: "#cardMultiple [name='provincia']",
-        multiple: true,
-        url: "@Url.Action("ObtenerProvincia", "Select2Complejo")",
-        maxlength: 15,
-        placeholder: "Seleccione una Provincia",
-        registrosPorPagina: 10,
-        params: () => ({ codigosRegiones: $("#cardMultiple [name='region']").val() }),
-        onchange: () => limpiarSelect2("#cardMultiple [name='comuna']")
-    });
+    function definirSelect2_multiple_provincia(optionsSeleccionados = null)
+    {
+        llenarSelect2({
+            querySelector: "#cardMultiple [name='provincia']",
+            multiple: true,
+            url: "@Url.Action("ObtenerProvincia", "Select2Complejo")",
+            maxlength: 15,
+            placeholder: "Seleccione una Provincia",
+            registrosPorPagina: 10,
+            params: () => ({ codigosRegiones: $("#cardMultiple [name='region']").val() }),
+            onchange: () => limpiarSelect2("#cardMultiple [name='comuna']"),
+            optionsSeleccionados
+        });
+    }
 
-    llenarSelect2({
-        querySelector: "#cardMultiple [name='comuna']",
-        multiple: true,
-        url: "@Url.Action("ObtenerComuna", "Select2Complejo")",
-        maxlength: 15,
-        placeholder: "Seleccione una Comuna",
-        registrosPorPagina: 10,
-        params: () => ({ codigosProvincias: $("#cardMultiple [name='provincia']").val() })
-    });
-
+    function definirSelect2_multiple_comuna(optionsSeleccionados = null)
+    {
+        llenarSelect2({
+            querySelector: "#cardMultiple [name='comuna']",
+            multiple: true,
+            url: "@Url.Action("ObtenerComuna", "Select2Complejo")",
+            maxlength: 15,
+            placeholder: "Seleccione una Comuna",
+            registrosPorPagina: 10,
+            params: () => ({ codigosProvincias: $("#cardMultiple [name='provincia']").val() }),
+            optionsSeleccionados
+        });
+    }
 
     //#endregion Multiple
+
+    async function traerDatosMultiple()
+    {
+        try {
+            let res = await obtenerDatos({
+                url: `@Url.Action("TraerDatosMultiple", "Select2Complejo")`,
+                queryString: null
+            });
+
+            definirSelect2_multiple_region(res.regiones);
+            definirSelect2_multiple_provincia(res.provincias);
+            definirSelect2_multiple_comuna(res.comunas);
+        }
+        catch (ex) {
+            console.log(ex);
+        }
+    }
 
     function llenarSelect2(datos)
     {
