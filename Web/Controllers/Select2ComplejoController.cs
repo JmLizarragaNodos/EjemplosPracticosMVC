@@ -134,38 +134,29 @@ namespace Web.Controllers
 
             try
             {
-                var regiones = _regiones.Where(x => new List<int>() { 3, 6 }.Contains(x.idRegion)).Select(x => new OptionSelect2
+                var regionesSeleccionadas = new HashSet<int> { 3, 6 };
+                var provinciasSeleccionadas = new HashSet<int> { 6, 7, 14 };
+                var comunasSeleccionadas = new HashSet<int> { 16, 20, 47, 51 };
+
+                var regiones = new List<OptionSelect2>();
+                var provincias = new List<OptionSelect2>();
+                var comunas = new List<OptionSelect2>();
+
+                foreach (var region in _regiones.Where(region => regionesSeleccionadas.Contains(region.idRegion)))
                 {
-                    id = x.idRegion.ToString(),
-                    text = x.nombreRegion
-                }).ToList();
+                    regiones.Add(new OptionSelect2(region.idRegion.ToString(), region.nombreRegion));
 
-                var codigosRegiones = regiones.Select(x => x.id).ToList();
+                    foreach (var provincia in region.provincias.Where(provincia => provinciasSeleccionadas.Contains(provincia.idProvincia)))
+                    {
+                        provincias.Add(new OptionSelect2(provincia.idProvincia.ToString(), provincia.nombreProvincia));
 
-                var provincias = _regiones
-                .Where(region => codigosRegiones.Contains(region.idRegion.ToString()))
-                .SelectMany(region => region.provincias)
-                .Where(x => new List<int>() { 6, 7, 14 }.Contains(x.idProvincia))
-                .Select(x => new OptionSelect2
-                {
-                    id = x.idProvincia.ToString(),
-                    text = x.nombreProvincia
-                })
-                .ToList();
-
-                var codigosProvincias = provincias.Select(x => x.id).ToList();
-
-                var comunas = _regiones
-                .SelectMany(region => region.provincias)
-                .Where(provincia => codigosProvincias.Contains(provincia.idProvincia.ToString()))
-                .SelectMany(provincia => provincia.comunas)
-                .Where(x => new List<int>() { 16, 20, 47, 51 }.Contains(x.idComuna))
-                .Select(x => new OptionSelect2
-                {
-                    id = x.idComuna.ToString(),
-                    text = x.nombreComuna
-                })
-                .ToList(); 
+                        foreach (var comuna in provincia.comunas)
+                        {
+                            if (comunasSeleccionadas.Contains(comuna.idComuna))
+                                comunas.Add(new OptionSelect2(comuna.idComuna.ToString(), comuna.nombreComuna));  
+                        }
+                    }
+                }
 
                 res.objeto = new { regiones, provincias, comunas };
             }
@@ -176,6 +167,5 @@ namespace Web.Controllers
 
             return Json(res, JsonRequestBehavior.AllowGet);
         }
-
     }
 }
