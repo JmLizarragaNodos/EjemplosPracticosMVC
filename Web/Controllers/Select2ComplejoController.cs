@@ -134,31 +134,34 @@ namespace Web.Controllers
 
             try
             {
-                var regionesSeleccionadas = new HashSet<int> { 3, 6 };
-                var provinciasSeleccionadas = new HashSet<int> { 6, 7, 14 };
                 var comunasSeleccionadas = new HashSet<int> { 16, 20, 47, 51 };
+                var lista = new List<dynamic>();
 
-                var regiones = new List<OptionSelect2>();
-                var provincias = new List<OptionSelect2>();
-                var comunas = new List<OptionSelect2>();
-
-                foreach (var region in _regiones.Where(region => regionesSeleccionadas.Contains(region.idRegion)))
+                foreach (var region in _regiones)
                 {
-                    regiones.Add(new OptionSelect2(region.idRegion.ToString(), region.nombreRegion));
-
-                    foreach (var provincia in region.provincias.Where(provincia => provinciasSeleccionadas.Contains(provincia.idProvincia)))
+                    foreach (var provincia in region.provincias)
                     {
-                        provincias.Add(new OptionSelect2(provincia.idProvincia.ToString(), provincia.nombreProvincia));
-
-                        foreach (var comuna in provincia.comunas)
+                        foreach (var comuna in provincia.comunas.Where(comuna => comunasSeleccionadas.Contains(comuna.idComuna)))
                         {
-                            if (comunasSeleccionadas.Contains(comuna.idComuna))
-                                comunas.Add(new OptionSelect2(comuna.idComuna.ToString(), comuna.nombreComuna));  
+                            lista.Add(new
+                            {
+                                idRegion = region.idRegion.ToString(),
+                                nombreRegion = region.nombreRegion,
+                                idProvincia = provincia.idProvincia.ToString(),
+                                nombreProvincia = provincia.nombreProvincia,
+                                idComuna = comuna.idComuna.ToString(),
+                                nombreComuna = comuna.nombreComuna
+                            });
                         }
                     }
                 }
 
-                res.objeto = new { regiones, provincias, comunas };
+                res.objeto = new
+                {
+                    regiones = lista.DistinctBy(x => x.idRegion).Select(h => new OptionSelect2(h.idRegion, h.nombreRegion)).ToList(),
+                    provincias = lista.DistinctBy(x => x.idProvincia).Select(h => new OptionSelect2(h.idProvincia, h.nombreProvincia)).ToList(),
+                    comunas = lista.DistinctBy(x => x.idComuna).Select(h => new OptionSelect2(h.idComuna, h.nombreComuna)).ToList()
+                };
             }
             catch (Exception ex)
             {
