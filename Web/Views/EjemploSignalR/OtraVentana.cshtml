@@ -1,0 +1,29 @@
+﻿<script>
+    document.addEventListener("DOMContentLoaded", () => alCargarPagina());
+
+    function alCargarPagina()
+    {
+        const connection = $.hubConnection("https://localhost:44353/signalr");
+        const chat = connection.createHubProxy("chatHub");
+
+        // Recibir mensaje del servidor
+        chat.on("NotifyUser", (message) => {
+            if (message) { // Verificar que el mensaje no sea null o vacío
+                alert(message);
+            }
+        });
+
+        connection.start().done(() =>
+        {
+            console.log("SignalR connected");
+
+            // Pedir mensaje actual al servidor al conectar
+            chat.invoke("get_weather").catch((err) => {
+                console.error(err.toString());
+            });
+        })
+        .fail((err) => {
+            console.log("Could not connect: " + err);
+        });
+    }
+</script>

@@ -1,0 +1,36 @@
+﻿
+<script>
+    let cargaCompletaSignalR = false;
+    let chat = null;
+
+    document.addEventListener("DOMContentLoaded", () => alCargarPagina());
+
+    function alCargarPagina()
+    {
+        const connection = $.hubConnection("https://localhost:44353/signalr");
+        chat = connection.createHubProxy('chatHub');
+
+        connection.start().done(() =>
+        {
+            console.log("SignalR connected");
+            cargaCompletaSignalR = true;
+        })
+        .fail((err) => {
+            console.log("Could not connect: " + err);
+        });
+    }
+
+    function enviarMensaje()
+    {
+        if (!cargaCompletaSignalR) return;
+
+        const message = document.getElementById('messageInput').value;
+        chat.invoke('change_weather', message).catch((err) => {
+            console.error(err.toString());
+        });
+    }
+
+</script>
+
+<input type="text" id="messageInput" placeholder="Enter message" />
+<button onclick="enviarMensaje()">Enviar</button>

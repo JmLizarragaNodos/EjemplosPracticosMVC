@@ -23,6 +23,9 @@
     <script src="https://cdn.datatables.net/1.10.18/js/jquery.dataTables.min.js"></script>
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.18/css/jquery.dataTables.min.css">
 
+    <script src="~/Scripts/ASP.NET_SignalR_2.4.2.js"></script>
+    @*<script src="https://cdnjs.cloudflare.com/ajax/libs/signalr.js/2.4.2/jquery.signalR.min.js"></script>*@
+
     <title>Ejemplos Prácticos</title>
 
     <style>
@@ -53,41 +56,36 @@
 
         /* Ajusta el z-index del menú desplegable de Select2 */
         .select2-container--default .select2-dropdown--below {
-            z-index: 5000; 
+            z-index: 5000;
         }
 
         .select2-container--default .select2-dropdown--above {
-            z-index: 5000; 
+            z-index: 5000;
         }
 
         /* ============================================================================================================ */
     </style>
     <script>
-        function obtenerDatos(datos)
-        {
-            return new Promise((resolve, reject) =>
-            {
+        function obtenerDatos(datos) {
+            return new Promise((resolve, reject) => {
                 fetch(datos.url, {
                     method: "POST",
                     headers: { "Content-Type": "application/x-www-form-urlencoded" },
                     body: datos.queryString,
                 })
-                .then(response =>
-                {
-                    if (response.ok)
-                    {
-                        response.json().then(res =>
-                        {
-                            if (res.status == 200)
-                                resolve(res.objeto);
-                            else
-                                reject(res);
-                        });
-                    }
-                })
-                .catch(error => {
-                    reject("Ocurrió un error al obtener la información");
-                });
+                    .then(response => {
+                        if (response.ok) {
+                            response.json().then(res => {
+                                if (res.status == 200)
+                                    resolve(res.objeto);
+                                else
+                                    reject(res);
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        reject("Ocurrió un error al obtener la información");
+                    });
             });
         }
     </script>
@@ -142,6 +140,16 @@
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                             <li><a class="dropdown-item" href="@Url.Action("Index", "DataTable")">Simple</a></li>
                             <li><a class="dropdown-item" href="@Url.Action("Index", "DataTableComplejo")">Complejo</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            SignalR
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="@Url.Action("Index", "EjemploSignalR")">Enviar Mensaje</a></li>
+                            <li><a class="dropdown-item" href="@Url.Action("OtraVentana", "EjemploSignalR")">Recibir Mensaje</a></li>
                         </ul>
                     </li>
 
