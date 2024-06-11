@@ -1,63 +1,48 @@
-﻿
-<script>
+﻿<script>
     let rut = null;
-    let cargaCompletaSignalR = false;
-    let chatEnvioMensaje = null;
-
-    const conectar = () => $.hubConnection("https://localhost:44353/signalr");
-    const definirChat = (conexion) => conexion.createHubProxy("chatHub");
+    let chat = null;
+    let connection = null;
 
     document.addEventListener("DOMContentLoaded", () => alCargarPagina());
 
     function alCargarPagina()
     {
-        let urlParams = new URLSearchParams(window.location.search);
+        const urlParams = new URLSearchParams(window.location.search);
         rut = urlParams.get("rut");
 
         if (rut) {
             console.log("El valor del parámetro rut es:", rut);
-            habilitarEnvioMensaje();
-            obtenerMensaje();
+            conectarSignalR();
         }
         else {
             alert("El parámetro rut no está presente en la URL");
         }
     }
 
-    function obtenerMensaje()
+    function conectarSignalR()
     {
-        const conexion = conectar();
-        const chat = definirChat(conexion);
+        connection = $.hubConnection("https://localhost:44353/signalr");
+        chat = connection.createHubProxy("chatHub");
 
-        // Recibir mensaje del servidor
-        chat.on("NotifyUser", (message) => {
-            if (message) { // Verificar que el mensaje no sea null o vacío
-                alert(message);
+        connection.qs = { "rut": rut };  // Añadir el rut a la query string de la conexión
+
+        chat.on("NotifyUser", (message) =>  // Recibir mensaje del servidor
+        {
+            if (message) {
+                const messageObj = JSON.parse(message);
+                console.log(messageObj);
+                alert(JSON.stringify(messageObj, null, 2));
             }
         });
 
-        conexion.start().done(() =>
+        connection.start().done(() =>
         {
             console.log("SignalR connected");
 
-            // Pedir mensaje actual al servidor al conectar
-            chat.invoke("get_weather").catch((err) => {
-                console.error(err.toString());
+            chat.invoke("get_weather").catch((err) =>  // Pedir mensaje actual al servidor al conectar
+            {
+                console.error("Error invoking get_weather: " + err.toString());
             });
-        })
-        .fail((err) => {
-            console.log("Could not connect: " + err);
-        });
-    }
-
-    function habilitarEnvioMensaje()
-    {
-        const conexion = conectar();
-        chatEnvioMensaje = definirChat(conexion);
-
-        conexion.start().done(() => {
-            console.log("SignalR connected");
-            cargaCompletaSignalR = true;
         })
         .fail((err) => {
             console.log("Could not connect: " + err);
@@ -66,20 +51,19 @@
 
     function enviarMensaje()
     {
-        if (!cargaCompletaSignalR) return;
-        //const message = document.getElementById("messageInput").value;
+        const recipientRut = document.getElementById("recipientRut").value;
 
-        const message = JSON.stringify({
-            rut: rut,
+        const message = {
+            rut: recipientRut,
             data: document.getElementById("messageInput").value
-        });
+        };
 
-        chatEnvioMensaje.invoke('change_weather', message).catch((err) => {
-            console.error(err.toString());
+        chat.invoke('change_weather', JSON.stringify(message)).catch((err) => {
+            console.error("Error invoking change_weather: " + err.toString());
         });
     }
-
 </script>
 
+<input type="text" id="recipientRut" placeholder="Recipient RUT" />
 <input type="text" id="messageInput" placeholder="Enter message" />
 <button onclick="enviarMensaje()">Enviar</button>
