@@ -15,12 +15,17 @@ namespace Web.Controllers
 {
     public class EjemploSignalRController : Controller
     {
-        public ActionResult Index() 
+        public ActionResult Index()
         {
             return View();
         }
 
-        public ActionResult OtraVentana()
+        public ActionResult ProbandoEnviarMensaje()
+        {
+            return View();
+        }
+
+        public ActionResult ProbandoRecibirMensaje()
         {
             return View();
         }

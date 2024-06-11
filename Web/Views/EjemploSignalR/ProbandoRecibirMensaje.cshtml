@@ -4,7 +4,7 @@
     function alCargarPagina()
     {
         const connection = $.hubConnection("https://localhost:44353/signalr");
-        const chat = connection.createHubProxy("chatHub");
+        const chat = connection.createHubProxy("probandoHub");
 
         // Recibir mensaje del servidor
         chat.on("NotifyUser", (message) => {

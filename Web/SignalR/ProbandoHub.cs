@@ -3,7 +3,7 @@ using Microsoft.AspNet.SignalR.Hubs;
 
 namespace Web.SignalR
 {
-    public class ChatHub : Hub
+    public class ProbandoHub : Hub
     {
         public static string _atributo;
 
@@ -20,11 +20,5 @@ namespace Web.SignalR
             Clients.Caller.NotifyUser(_atributo);
         }
 
-    }
-
-    public class DatosRecibidos
-    {
-        public string rut { get; set; }
-        public string data { get; set; }
     }
 }
