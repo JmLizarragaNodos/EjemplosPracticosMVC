@@ -1,0 +1,98 @@
+﻿<div id="ejemploCard" class="card">
+    <div class="card-header">
+        <div class="row">
+            <div class="col-12 d-flex align-items-end justify-content-between">
+                <h4 class="float-left heading h4-responsive mb-0">Encriptar</h4>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-12 col-md-6">
+                <div class="form-group">
+                    <label>Texto (Sin espacios en blanco)</label>
+                    <input type="text" name="texto" placeholder="Ingrese texto" class="form-control" autocomplete="off">
+                </div>
+            </div>
+            <div class="col-12 col-md-6">
+                <div class="form-group">
+                    <label>Texto Encriptado</label>
+                    <textarea name="textoEncriptado" class="form-control" disabled></textarea>
+                </div>
+            </div>
+            <div class="col-12 col-md-6">
+                <div class="form-group">
+                    <label>Texto Desencriptado</label>
+                    <input type="text" name="textoDesencriptado" class="form-control" disabled>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-footer">
+        <div class="row py-2 flex-row">
+            <div class="col col-md-6 d-flex justify-content-start">
+            </div>
+            <div class="col col-md-6 d-flex justify-content-end">
+                <button type="button" onclick="encriptar()" class="btn btn-primary me-2">
+                    <span>Encriptar</span>
+                </button>
+                <button type="button" onclick="desencriptar()" class="btn btn-secondary">
+                    <span>Desencriptar</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    this.textoEncriptado = null;
+
+    async function encriptar()
+    {
+        let texto = document.querySelector("#ejemploCard [name='texto']").value;
+
+        if (!validarNuloVacio(texto))
+            return alert("El texto es requerido");
+
+        //showLoading();
+
+        try {
+            let res = await obtenerDatos({
+                url: `@Url.Action("EncriptarTexto", "Encriptar")`,
+                queryString: `texto=${texto}`
+            });
+
+            console.log(res.textoEncriptado);
+            this.textoEncriptado = res.textoEncriptado;
+            document.querySelector("#ejemploCard [name='textoEncriptado']").value = res.textoEncriptado;
+        }
+        catch (ex) {
+            console.log(ex);
+        }
+        //finally { hideLoading() }
+    }
+
+    async function desencriptar()
+    {
+        if (!validarNuloVacio(this.textoEncriptado))
+            return alert("El texto encriptado es requerido");
+
+        //showLoading();
+
+        try {
+            let res = await obtenerDatos({
+                url: `@Url.Action("DesencriptarTexto", "Encriptar")`,
+                queryString: `textoEncriptado=${this.textoEncriptado}`
+            });
+
+            document.querySelector("#ejemploCard [name='textoDesencriptado']").value = res.textoDesencriptado;
+        }
+        catch (ex) {
+            console.log(ex);
+        }
+        //finally { hideLoading() }
+    }
+
+</script>
+

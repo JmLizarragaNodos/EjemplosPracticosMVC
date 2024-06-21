@@ -298,6 +298,7 @@
     <Compile Include="Controllers\EjemploDescargaCsvController.cs" />
     <Compile Include="Controllers\EjemploDescargaExcelController.cs" />
     <Compile Include="Controllers\EjemploSignalRController.cs" />
+    <Compile Include="Controllers\EncriptarController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\OpenHtmlToPdfController.cs" />
     <Compile Include="Controllers\Select2ComplejoController.cs" />
@@ -310,6 +311,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Helpers\ChileHelper.cs" />
+    <Compile Include="Helpers\CryptoHelper.cs" />
     <Compile Include="Helpers\ExcelHelper.cs" />
     <Compile Include="Helpers\FileHelper.cs" />
     <Compile Include="Helpers\LinqHelper.cs" />
@@ -340,6 +342,7 @@
     <Content Include="Views\EjemploSignalR\ProbandoEnviarMensaje.cshtml" />
     <Content Include="Views\EjemploSignalR\ProbandoRecibirMensaje.cshtml" />
     <Content Include="Views\EjemploSignalR\Index.cshtml" />
+    <Content Include="Views\Encriptar\Index.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
