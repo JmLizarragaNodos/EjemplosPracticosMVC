@@ -1,4 +1,5 @@
 ﻿<script>
+
     let rut = null;
     let chat = null;
     let connection = null;
@@ -24,10 +25,9 @@
         connection = $.hubConnection("https://localhost:44353/signalr");
         chat = connection.createHubProxy("chatHub");
 
-        connection.qs = { "rut": rut };  // Añadir el rut a la query string de la conexión
+        connection.qs = { "rut": rut }; // Añadir el rut a la query string de la conexión
 
-        chat.on("NotifyUser", (message) =>  // Recibir mensaje del servidor
-        {
+        chat.on("NotifyUser", (message) => { // Recibir mensaje del servidor
             if (message) {
                 const messageObj = JSON.parse(message);
                 console.log(messageObj);
@@ -39,8 +39,24 @@
         {
             console.log("SignalR connected");
 
-            chat.invoke("get_weather").catch((err) =>  // Pedir mensaje actual al servidor al conectar
+            chat.invoke("get_weather").done((result) =>  // Pedir mensaje actual al servidor al conectar
             {
+                if (result)
+                {
+                    const messageObj = JSON.parse(result);
+
+                    if (messageObj)
+                    {
+                        //if (messageObj.sesionActiva == false) {
+                        //    return alert("Se terminó la sesión");
+                        //}
+
+                        if (messageObj.mensajePrivado) {
+                            alert(`Mensaje recibido: ${messageObj.mensajePrivado}`);
+                        }
+                    }
+                }
+            }).catch((err) => {
                 console.error("Error invoking get_weather: " + err.toString());
             });
         })
@@ -51,19 +67,68 @@
 
     function enviarMensaje()
     {
-        const recipientRut = document.getElementById("recipientRut").value;
+        const rut = document.getElementById("recipientRut").value;
 
-        const message = {
-            rut: recipientRut,
-            data: document.getElementById("messageInput").value
-        };
+        const message = JSON.stringify({
+            rut,
+            mensaje: document.getElementById("messageInput").value,
+            operacion: "enviar_mensaje_privado"
+        });
 
-        chat.invoke('change_weather', JSON.stringify(message)).catch((err) => {
+        chat.invoke("change_weather", message).catch((err) => {
             console.error("Error invoking change_weather: " + err.toString());
         });
     }
+
+    function cerrarOtraSesion()
+    {
+        const rut = document.getElementById("recipientRut").value;
+        const message = JSON.stringify({ rut, mensaje: "", operacion: "cerrar_otra_sesion" });
+
+        chat.invoke("change_weather", message).catch((err) => {
+            console.error("Error invoking change_weather: " + err.toString());
+        });
+    }
+
 </script>
 
-<input type="text" id="recipientRut" placeholder="Recipient RUT" />
-<input type="text" id="messageInput" placeholder="Enter message" />
-<button onclick="enviarMensaje()">Enviar</button>
+<div class="card">
+    <div class="card-header">
+        <div class="row">
+            <div class="col-12 d-flex align-items-end justify-content-between">
+                <h4 class="float-left heading h4-responsive mb-0">Ejemplo SignalR</h4>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-12 col-md-6">
+                <div class="form-group">
+                    <label>Rut</label>
+                    <input type="text" id="recipientRut" placeholder="Ingrese rut" class="form-control">
+                </div>
+            </div>
+            <div class="col-12 col-md-6">
+                <div class="form-group">
+                    <label>Mensaje</label>
+                    <input type="text" id="messageInput" placeholder="Ingrese mensaje" class="form-control" autocomplete="off">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-footer">
+        <div class="row py-2 flex-row">
+            <div class="col col-md-6 d-flex justify-content-start">
+            </div>
+            <div class="col col-md-6 d-flex justify-content-end">
+                <button type="button" onclick="enviarMensaje()" class="btn btn-primary me-2">
+                    <span>Enviar Mensaje</span>
+                </button>
+
+                <button type="button" onclick="cerrarOtraSesion()" class="btn btn-secondary">
+                    <span>Cerrar Otra Sesion</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
