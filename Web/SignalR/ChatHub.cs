@@ -55,13 +55,16 @@ namespace Web.SignalR
 
             //========================================>>>>
 
-            var datoInterno = new DatoInterno { rut = datoRecibido.rut };
+            DatoInterno datoInterno = LlamadasDbSignalR.GetByRut(datoRecibido.rut);
 
             if (datoRecibido.operacion == "enviar_mensaje_privado")
                 datoInterno.mensajePrivado = datoRecibido.mensaje;
 
             if (datoRecibido.operacion == "cerrar_otra_sesion")
-                datoInterno.sesionActiva = false;
+                LlamadasDbSignalR.CerrarSesionByRut(datoRecibido.rut);
+
+            if (datoRecibido.operacion == "abrir_otra_sesion")
+                LlamadasDbSignalR.AbrirSesionByRut(datoRecibido.rut);
 
             //========================================>>>>
 
@@ -109,13 +112,5 @@ namespace Web.SignalR
             public string mensaje { get; set; }
         }
 
-        public class DatoInterno
-        {
-            public string rut { get; set; }
-            public bool sesionActiva { get; set; } = true;
-            public string mensajePrivado { get; set; }
-            public string blablabla { get; set; } = "nada";
-            public string jajajajaa { get; set; } = "nada";
-        }
     }
 }

@@ -51,5 +51,22 @@ namespace Web.Controllers
 
             return Json(res);
         }
+
+        [HttpPost]
+        public ActionResult NumberToText(int numero)
+        {
+            var res = new RespuestaBackend();
+
+            try
+            {
+                res.objeto = numero.ObtenerCadenaDeTexto();
+            }
+            catch (Exception ex)
+            {
+                res.AgregarInternalServerError(ex.Message);
+            }
+
+            return Json(res);
+        }
     }
 }

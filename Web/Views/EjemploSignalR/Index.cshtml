@@ -27,9 +27,16 @@
 
         connection.qs = { "rut": rut }; // Añadir el rut a la query string de la conexión
 
-        chat.on("NotifyUser", (message) => { // Recibir mensaje del servidor
-            if (message) {
+        chat.on("NotifyUser", (message) =>  // Recibir mensaje del servidor
+        { 
+            if (message)
+            {
                 const messageObj = JSON.parse(message);
+
+                if (messageObj.sesionActiva == false) {
+                    return alert("Se terminó la sesión");
+                }
+
                 console.log(messageObj);
                 alert(JSON.stringify(messageObj, null, 2));
             }
@@ -47,10 +54,6 @@
 
                     if (messageObj)
                     {
-                        //if (messageObj.sesionActiva == false) {
-                        //    return alert("Se terminó la sesión");
-                        //}
-
                         if (messageObj.mensajePrivado) {
                             alert(`Mensaje recibido: ${messageObj.mensajePrivado}`);
                         }
@@ -84,6 +87,16 @@
     {
         const rut = document.getElementById("recipientRut").value;
         const message = JSON.stringify({ rut, mensaje: "", operacion: "cerrar_otra_sesion" });
+
+        chat.invoke("change_weather", message).catch((err) => {
+            console.error("Error invoking change_weather: " + err.toString());
+        });
+    }
+
+    function abrirOtraSesion()
+    {
+        const rut = document.getElementById("recipientRut").value;
+        const message = JSON.stringify({ rut, mensaje: "", operacion: "abrir_otra_sesion" });
 
         chat.invoke("change_weather", message).catch((err) => {
             console.error("Error invoking change_weather: " + err.toString());
@@ -127,6 +140,10 @@
 
                 <button type="button" onclick="cerrarOtraSesion()" class="btn btn-secondary">
                     <span>Cerrar Otra Sesion</span>
+                </button>
+
+                <button type="button" onclick="abrirOtraSesion()" class="btn btn-success">
+                    <span>Abrir Otra Sesion</span>
                 </button>
             </div>
         </div>
