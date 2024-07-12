@@ -14,10 +14,24 @@ namespace Web.Controllers
         }
 
         [HttpPost]
-        public ActionResult DescargarPDF(string contenidoPDF, string nombreArchivo)
+        public ActionResult DescargarPDF(string tipoPapel, string contenidoPDF, string nombreArchivo)
         {
             try
             {
+                // Tamaños de hoja
+                // https://github.com/vilppu/OpenHtmlToPdf/blob/master/OpenHtmlToPdf/PaperSize.cs
+
+                PaperSize size = null;      // size = new OpenHtmlToPdf.PaperSize(8.5.Inches(), 14.Inches());  // Legal
+
+                if (tipoPapel == "carta")
+                    size = new PaperSize(Length.Millimeters(216), Length.Millimeters(279));
+
+                if (tipoPapel == "oficio")
+                    size = new PaperSize(8.5.Inches(), 13.Inches());  // Folio
+   
+                if (tipoPapel == "A4")
+                    size = new PaperSize(210.Millimeters(), 297.Millimeters());
+
                 contenidoPDF = DesencriptarHtml(contenidoPDF);
 
                 string logoInacapBase64 = "";
@@ -40,12 +54,10 @@ namespace Web.Controllers
                 html += contenidoPDF;
                 html += $"</body></html>";
 
-                PaperSize tamañoCarta = new PaperSize(Length.Millimeters(216), Length.Millimeters(279));
-
                 byte[] buffer = new byte[0];
 
                 buffer = Pdf.From(html)
-                    .OfSize(tamañoCarta)
+                    .OfSize(size)
                     .WithObjectSetting("web.defaultEncoding", "utf-8")
                     .Content();
 

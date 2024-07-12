@@ -7,9 +7,13 @@
             <div class="row g-3">
 
                 <div class="col-md-4">
-                    <h4>OpenHtmlToPdf</h4> <br /><br />
+                    <h4>Descarga con OpenHtmlToPdf</h4> <br /><br />
 
-                    <button type="button" onclick="descargarPDF()" class="btn btn-primary">Descargar PDF</button>
+                    <button type="button" onclick="descargarPDF('carta')" class="btn btn-primary">Carta</button>
+
+                    <button type="button" onclick="descargarPDF('oficio')" class="btn btn-success">Oficio</button>
+
+                    <button type="button" onclick="descargarPDF('A4')" class="btn btn-primary">A4</button>
                 </div>
             </div>
 
@@ -18,90 +22,10 @@
 
 </div>
 
-<!--
-<style>
-    p { word-break: break-word; } /* Impedir textos enormes que desbordan la página */
-
-    /* ======================================================================== */
-    /* Organizar tablas en caso de que sobrepasen la página */
-
-    thead {
-        display: table-row-group;
-    }
-    tr {
-        page-break-before: always;
-        page-break-after: always;
-        page-break-inside: avoid;
-    }
-    table {
-        word-break: break-word;  /* Impedir que textos enormes dentro de la celda desbordan la página */
-    }
-    table td {
-        word-break: break-word;  /* Impedir que textos enormes dentro de la celda desbordan la página */
-        min-width: 80px;
-    }
-
-    /* ======================================================================== */
-
-    .encabezado {
-        page-break-inside: avoid !important;
-    }
-
-    .tabla-info {
-        /* table-layout: fixed; */
-        width:100%;
-        border-collapse: collapse;
-    }
-
-    .tabla-info th, td {
-        border: 1px solid rgb(104, 103, 103);
-    }
-
-    .tabla-info td {
-        padding: 5px;
-    }
-
-    .tabla-info th {
-        /* white-space: nowrap; */    /* Impide que haga un salto de linea  */
-        padding: 3px;
-    }
-
-    .tabla-info thead {
-        background-color: gray; color: white;
-    }
-
-    .sin-borde {
-        border:none !important;
-    }
-</style>
-
-<div id="contenidoPDF">
-
-    <br/><br />
-    <table class="tabla-info">
-        <thead>
-            <tr>
-                <th>Producto</th>
-                <th>Descripción</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>AAAAAA</td>
-                <td>BBBBBB</td>
-            </tr>
-        </tbody>
-    </table>
-
-</div>
--->
-
 <script>
 
-    function descargarPDF()
+    function descargarPDF(tipoPapel = "carta")
     {
-        //let contenidoPDF = document.querySelector("#contenidoPDF").innerHTML;
-
         let arreglo = [
             { producto: "Producto 0", descripcion: "Descripción 0" },
             { producto: "Producto 1", descripcion: "Descripción 1" },
@@ -155,7 +79,7 @@
         fetch("@Url.Action("DescargarPDF", "OpenHtmlToPdf")", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ contenidoPDF, nombreArchivo })
+            body: JSON.stringify({ tipoPapel, contenidoPDF, nombreArchivo })
         })
         .then(res =>
         {
