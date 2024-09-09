@@ -176,12 +176,45 @@
         @RenderBody()
     </div>
 
+    <script src="~/Scripts/xlsx.full.min.js"></script>
+
     <script>
 
         function validarNuloVacio(contenido)
         {
             if (contenido == null || contenido == "") return false;
             return true;
+        }
+
+        function htmlEncoder(cadena)
+        {
+            cadena = cadena.replace(/&/g, '/amp/');  // Reeemplazar el &
+            cadena = cadena.replace(/</g, '/lt/');
+            cadena = cadena.replace(/>/g, '/gt/');
+            return cadena;
+        }
+
+        function toQueryString(objeto)
+        {
+            const encode = (value) =>
+            {
+                if (value != null && typeof value === "string")
+                    return encodeURIComponent(this.htmlEncoder(value));
+
+                return encodeURIComponent(value);
+            };
+
+            return Object.entries(objeto)
+                .map(([key, value]) => {
+                    if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+                        return `${encodeURIComponent(key)}=${encode(value)}`;
+                    }
+                    else {
+                        return "";
+                    }
+                })
+                .filter(x => x !== "")
+                .join('&');
         }
 
         function llenarSelect(datos)
@@ -249,6 +282,38 @@
         function limpiarSelect(querySelector) {
             $(querySelector + ' option[value!=""]').remove().end();     // Remueve todos los options excepto el seleccione
             // $(querySelector).trigger("chosen:updated");              // (MDBOOTSTRAP)
+        }
+
+        function generarExcel(data, nombreArchivo)
+        {
+            let workbook = XLSX.utils.book_new(),
+                worksheet = XLSX.utils.aoa_to_sheet(data);
+
+            workbook.SheetNames.push("Hoja 1");
+            workbook.Sheets["Hoja 1"] = worksheet;
+
+            let xlsbin = XLSX.write(workbook, {
+                bookType: "xlsx",
+                type: "binary"
+            });
+
+            let buffer = new ArrayBuffer(xlsbin.length),
+                array = new Uint8Array(buffer);
+
+            for (let i = 0; i < xlsbin.length; i++) {
+                array[i] = xlsbin.charCodeAt(i) & 0XFF;
+            }
+
+            let xlsblob = new Blob([buffer], { type: "application/octet-stream" });
+            delete array; delete buffer; delete xlsbin;
+
+            let url = window.URL.createObjectURL(xlsblob),
+                anchor = document.createElement("a");
+            anchor.href = url;
+            anchor.download = `${nombreArchivo}.xlsx`;
+            anchor.click();
+            window.URL.revokeObjectURL(url);
+            delete anchor;
         }
 
     </script>

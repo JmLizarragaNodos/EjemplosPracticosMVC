@@ -36,8 +36,8 @@
             </div>
             <div class="col col-md-6 d-flex justify-content-end">
 
-                <button type="button" class="btn btn-primary">
-                    <span>Probando</span>
+                <button type="button" onclick="descargarExcel()" class="btn btn-primary">
+                    <span>Descargar Excel</span>
                 </button>
 
                 <button type="button" class="btn btn-secondary">
@@ -52,7 +52,7 @@
 
 <script>
 
-    $(document).ready(function() 
+    $(document).ready(function()
     {
         desplegarGrilla();
     });
@@ -99,6 +99,56 @@
             ],
             order: [[1, 'desc']]    // Ordena por codigo
         });
+    }
+
+    function obtenerTodo(queryString)
+    {
+        return new Promise((resolve, reject) =>
+        {
+            fetch("@Url.Action("ObtenerDatos", "DataTable")", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: queryString // "draw=2&start=0&length=2"
+            })
+            .then(response => response.json())
+            .then(res => {
+                resolve(res);
+            })
+            .catch(error => {
+                reject(res);
+            });
+        });
+    }
+
+    async function descargarExcel()
+    {
+        var tabla = $("#TablaResultados").DataTable();
+        var totalRegistros = tabla.ajax.json().recordsTotal;
+        var params = tabla.ajax.params();
+
+        params["start"] = "0";
+        params["length"] = totalRegistros;
+        params["search[value]"] = tabla.search();
+
+        var queryString = toQueryString(params);
+        console.log(queryString);
+
+        let res = await obtenerTodo(queryString);
+
+        let data = [
+            [ "N°", "Nombre" ]
+        ];
+
+        res.data.forEach(x =>
+        {
+            data.push([
+                x.codigo,
+                x.nombre
+            ]);
+        });
+
+        console.log(data);
+        generarExcel(data, "Hola");
     }
 
     function showLoading() {
