@@ -11,6 +11,7 @@ namespace Web.SignalR
         public string mensajePrivado { get; set; }
         public string blablabla { get; set; } = "nada";
         public string jajajajaa { get; set; } = "nada";
+        public string identificadorUnico { get; set; }
     }
 
     public static class LlamadasDbSignalR

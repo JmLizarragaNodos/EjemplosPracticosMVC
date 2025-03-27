@@ -8,29 +8,37 @@ using System.Threading.Tasks;
 
 namespace Web.SignalR
 {
+    public class DatoRecibido
+    {
+        public string rut { get; set; }
+        public string operacion { get; set; }
+        public string mensaje { get; set; }
+        public string identificadorUnico { get; set; }
+    }
+
     [HubName("chatHub")]
     public class ChatHub : Hub
     {
-        private static ConcurrentDictionary<string, string> _connections = new ConcurrentDictionary<string, string>();
+        private static ConcurrentDictionary<string, List<string>> _connections = new ConcurrentDictionary<string, List<string>>();
         private static ConcurrentDictionary<string, string> _atributos = new ConcurrentDictionary<string, string>();
-        private static ConcurrentDictionary<string, List<string>> _unreadMessages = new ConcurrentDictionary<string, List<string>>();
+        private static ConcurrentDictionary<string, string> _unreadMessage = new ConcurrentDictionary<string, string>();
 
         public override Task OnConnected()
         {
             var rut = Context.QueryString["rut"];
+            var connectionId = Context.ConnectionId;
 
             if (!string.IsNullOrEmpty(rut))
             {
-                _connections[rut] = Context.ConnectionId;
-
-                // Enviar mensajes no entregados
-                if (_unreadMessages.TryGetValue(rut, out List<string> messages))
+                _connections.AddOrUpdate(rut, new List<string> { connectionId }, (key, oldList) =>
                 {
-                    foreach (var message in messages)
-                    {
-                        Clients.Client(Context.ConnectionId).NotifyUser(message);
-                    }
-                    _unreadMessages.TryRemove(rut, out _);
+                    oldList.Add(connectionId);
+                    return oldList;
+                });
+
+                if (_unreadMessage.TryRemove(rut, out string message))  // Enviar mensaje no entregado
+                {
+                    Clients.Client(connectionId).NotifyUser(message);
                 }
             }
             return base.OnConnected();
@@ -38,13 +46,29 @@ namespace Web.SignalR
 
         public override Task OnDisconnected(bool stopCalled)
         {
-            var rut = _connections.FirstOrDefault(x => x.Value == Context.ConnectionId).Key;
+            var connectionId = Context.ConnectionId;
 
-            if (!string.IsNullOrEmpty(rut))
+            // Buscar el rut asociado al connectionId
+            var entry = _connections.FirstOrDefault(x => x.Value.Contains(connectionId));
+
+            if (!string.IsNullOrEmpty(entry.Key))
             {
-                _connections.TryRemove(rut, out _);
-                _atributos.TryRemove(rut, out _);
+                var rut = entry.Key;
+
+                _connections.AddOrUpdate(rut, new List<string>(),
+                    (key, oldList) =>
+                    {
+                        oldList.Remove(connectionId);
+                        return oldList.Any() ? oldList : null; // Retornar null para eliminar la clave
+                    });
+
+                // Si la clave quedó sin conexiones, eliminarla
+                if (_connections.TryGetValue(rut, out var list) && (list == null || !list.Any()))
+                {
+                    _connections.TryRemove(rut, out _);
+                }
             }
+
             return base.OnDisconnected(stopCalled);
         }
 
@@ -53,8 +77,6 @@ namespace Web.SignalR
         {
             var datoRecibido = JsonConvert.DeserializeObject<DatoRecibido>(message);
 
-            //========================================>>>>
-
             DatoInterno datoInterno = LlamadasDbSignalR.GetByRut(datoRecibido.rut);
 
             if (datoInterno == null)
@@ -62,6 +84,8 @@ namespace Web.SignalR
                 Clients.Caller.NotifyUser($"No se encontró la persona con el rut {datoRecibido.rut}");
                 return;
             }
+
+            datoInterno.identificadorUnico = datoRecibido.identificadorUnico;
 
             if (datoRecibido.operacion == "enviar_mensaje_privado")
                 datoInterno.mensajePrivado = datoRecibido.mensaje;
@@ -72,21 +96,26 @@ namespace Web.SignalR
             if (datoRecibido.operacion == "abrir_otra_sesion")
                 LlamadasDbSignalR.AbrirSesionByRut(datoRecibido.rut);
 
-            //========================================>>>>
-
             var datoInternoString = JsonConvert.SerializeObject(datoInterno);
 
-            if (_connections.TryGetValue(datoRecibido.rut, out string connectionId))
+            if (_connections.TryGetValue(datoRecibido.rut, out List<string> connectionIds))
             {
                 _atributos[datoRecibido.rut] = datoInternoString;
-                Clients.Client(connectionId).NotifyUser(datoInternoString);
+
+                foreach (var conn in connectionIds)
+                {
+                    if (conn != Context.ConnectionId) // Evita enviar a la misma pantalla
+                    {
+                        Clients.Client(conn).NotifyUser(datoInternoString);
+                    }
+                }
             }
-            else  // Si el usuario no está conectado, almacenar el mensaje
+            else
             {
-                if (_unreadMessages.ContainsKey(datoRecibido.rut))
-                    _unreadMessages[datoRecibido.rut].Add(datoInternoString);
-                else
-                    _unreadMessages[datoRecibido.rut] = new List<string> { datoInternoString };
+                if (!_connections.ContainsKey(datoRecibido.rut))  // Si el usuario no está conectado
+                {
+                    _unreadMessage[datoRecibido.rut] = datoInternoString; // Solo guarda el último mensaje
+                }
             }
         }
 
@@ -94,29 +123,20 @@ namespace Web.SignalR
         public void GetWeather()
         {
             var rut = Context.QueryString["rut"];
-            if (!string.IsNullOrEmpty(rut) && _atributos.TryGetValue(rut, out string data))
-            {
-                var message = JsonConvert.DeserializeObject<DatoInterno>(data);
-                Clients.Caller.NotifyUser(JsonConvert.SerializeObject(message));
-            }
+            var connectionId = Context.ConnectionId;
 
-            // Enviar mensajes no entregados
-            if (_unreadMessages.TryGetValue(rut, out List<string> messages))
+            if (!string.IsNullOrEmpty(rut))
             {
-                foreach (var message in messages)
+                if (_atributos.TryGetValue(rut, out string data))
                 {
-                    Clients.Caller.NotifyUser(message);
+                    Clients.Client(connectionId).NotifyUser(data);
                 }
-                _unreadMessages.TryRemove(rut, out _);
+
+                if (_unreadMessage.TryRemove(rut, out string message))
+                {
+                    Clients.Client(connectionId).NotifyUser(message);
+                }
             }
         }
-
-        public class DatoRecibido
-        {
-            public string rut { get; set; }
-            public string operacion { get; set; }
-            public string mensaje { get; set; }
-        }
-
     }
 }
