@@ -3,69 +3,96 @@
     let rut = null;
     let chat = null;
     let connection = null;
+    let isConnected = false;
+    let hasLoggedDisconnect = false; // Para evitar múltiples logs de desconexión
 
     document.addEventListener("DOMContentLoaded", () => alCargarPagina());
 
-    function alCargarPagina()
-    {
+    function alCargarPagina() {
         const urlParams = new URLSearchParams(window.location.search);
         rut = urlParams.get("rut");
 
         if (rut) {
             console.log("El valor del parámetro rut es:", rut);
             conectarSignalR();
-        }
-        else {
+        } else {
             alert("El parámetro rut no está presente en la URL");
         }
     }
 
-    function conectarSignalR()
-    {
+    function conectarSignalR() {
         connection = $.hubConnection("https://localhost:44353/signalr");
         chat = connection.createHubProxy("chatHub");
 
-        connection.qs = { "rut": rut }; // Añadir el rut a la query string de la conexión
+        connection.qs = { "rut": rut };
 
-        chat.on("NotifyUser", (message) =>  // Recibir mensaje del servidor
-        { 
+        chat.on("NotifyUser", (message) =>
+        {
             if (message)
             {
-                const messageObj = JSON.parse(message);
-
-                if (messageObj.sesionActiva == false) {
-                    return alert("Se terminó la sesión");
+                try {
+                    const messageObj = JSON.parse(message);
+                    if (messageObj.sesionActiva == false) {
+                        return alert("Se terminó la sesión");
+                    }
+                    console.log(messageObj);
+                    alert(JSON.stringify(messageObj, null, 2));
                 }
-
-                console.log(messageObj);
-                alert(JSON.stringify(messageObj, null, 2));
+                catch (e) {
+                    alert(message);
+                }
             }
         });
 
         connection.start().done(() =>
         {
+            isConnected = true;
+            hasLoggedDisconnect = false;
             console.log("SignalR connected");
 
-            chat.invoke("get_weather").done((result) =>  // Pedir mensaje actual al servidor al conectar
-            {
-                if (result)
-                {
+            chat.invoke("get_weather").done((result) => {
+                if (result) {
                     const messageObj = JSON.parse(result);
-
-                    if (messageObj)
-                    {
-                        if (messageObj.mensajePrivado) {
-                            alert(`Mensaje recibido: ${messageObj.mensajePrivado}`);
-                        }
+                    if (messageObj && messageObj.mensajePrivado) {
+                        alert(`Mensaje recibido: ${messageObj.mensajePrivado}`);
                     }
                 }
             }).catch((err) => {
                 console.error("Error invoking get_weather: " + err.toString());
             });
         })
-        .fail((err) => {
-            console.log("Could not connect: " + err);
+        .fail((err) => 
+        {
+            if (!hasLoggedDisconnect) {
+                console.log("No se pudo conectar a SignalR. Intentando reconectar...");
+                hasLoggedDisconnect = true;
+            }
+            isConnected = false;
+            reconectarSignalR();
         });
+
+        connection.disconnected(() => {
+            if (!hasLoggedDisconnect) {
+                console.log("El backend dejó de estar disponible.");
+                hasLoggedDisconnect = true;
+            }
+            isConnected = false;
+
+            setTimeout(() => {
+                console.log("Intentando reconectar a SignalR...");
+                conectarSignalR();
+            }, 5000);
+        });
+    }
+
+    function reconectarSignalR()
+    {
+        setTimeout(() => {
+            if (!isConnected) {
+                console.log("Intentando reconectar a SignalR...");
+                conectarSignalR();
+            }
+        }, 5000);
     }
 
     function enviarMensaje()
@@ -78,9 +105,14 @@
             operacion: "enviar_mensaje_privado"
         });
 
-        chat.invoke("change_weather", message).catch((err) => {
-            console.error("Error invoking change_weather: " + err.toString());
-        });
+        if (chat && isConnected) {
+            chat.invoke("change_weather", message).catch((err) => {
+                console.error("Error invoking change_weather: " + err.toString());
+            });
+        }
+        else {
+            console.warn("No se pudo enviar el mensaje porque no hay conexión con SignalR.");
+        }
     }
 
     function cerrarOtraSesion()
@@ -88,9 +120,14 @@
         const rut = document.getElementById("recipientRut").value;
         const message = JSON.stringify({ rut, mensaje: "", operacion: "cerrar_otra_sesion" });
 
-        chat.invoke("change_weather", message).catch((err) => {
-            console.error("Error invoking change_weather: " + err.toString());
-        });
+        if (chat && isConnected)
+        {
+            chat.invoke("change_weather", message).catch((err) => {
+                console.error("Error invoking change_weather: " + err.toString());
+            });
+        } else {
+            console.warn("No se pudo cerrar la sesión porque no hay conexión con SignalR.");
+        }
     }
 
     function abrirOtraSesion()
@@ -98,10 +135,15 @@
         const rut = document.getElementById("recipientRut").value;
         const message = JSON.stringify({ rut, mensaje: "", operacion: "abrir_otra_sesion" });
 
-        chat.invoke("change_weather", message).catch((err) => {
-            console.error("Error invoking change_weather: " + err.toString());
-        });
+        if (chat && isConnected) {
+            chat.invoke("change_weather", message).catch((err) => {
+                console.error("Error invoking change_weather: " + err.toString());
+            });
+        } else {
+            console.warn("No se pudo abrir la sesión porque no hay conexión con SignalR.");
+        }
     }
+
 
 </script>
 

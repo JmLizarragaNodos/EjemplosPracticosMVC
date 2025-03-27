@@ -57,6 +57,12 @@ namespace Web.SignalR
 
             DatoInterno datoInterno = LlamadasDbSignalR.GetByRut(datoRecibido.rut);
 
+            if (datoInterno == null)
+            {
+                Clients.Caller.NotifyUser($"No se encontró la persona con el rut {datoRecibido.rut}");
+                return;
+            }
+
             if (datoRecibido.operacion == "enviar_mensaje_privado")
                 datoInterno.mensajePrivado = datoRecibido.mensaje;
 
