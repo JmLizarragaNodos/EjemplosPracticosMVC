@@ -317,6 +317,7 @@
     <Compile Include="Controllers\EncriptarController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\OpenHtmlToPdfController.cs" />
+    <Compile Include="Controllers\PdfConGoController.cs" />
     <Compile Include="Controllers\Select2ComplejoController.cs" />
     <Compile Include="Controllers\Select2Controller.cs" />
     <Compile Include="Controllers\SubirExcelController.cs" />
@@ -331,6 +332,7 @@
     <Compile Include="Helpers\ExcelHelper.cs" />
     <Compile Include="Helpers\FileHelper.cs" />
     <Compile Include="Helpers\LinqHelper.cs" />
+    <Compile Include="Helpers\ParametrosHelper.cs" />
     <Compile Include="Helpers\TextosHelper.cs" />
     <Compile Include="Models\Comuna.cs" />
     <Compile Include="Models\Provincia.cs" />
@@ -362,6 +364,7 @@
     <Content Include="Views\EjemploSignalR\Index.cshtml" />
     <Content Include="Views\Encriptar\Index.cshtml" />
     <Content Include="Views\EjemploJwt\Index.cshtml" />
+    <Content Include="Views\PdfConGo\Index.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

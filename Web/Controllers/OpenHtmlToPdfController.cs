@@ -1,8 +1,8 @@
 ﻿using OpenHtmlToPdf;
 using System;
 using System.IO;
-using System.Text.RegularExpressions;
 using System.Web.Mvc;
+using Web.Helpers;
 
 namespace Web.Controllers
 {
@@ -32,7 +32,7 @@ namespace Web.Controllers
                 if (tipoPapel == "A4")
                     size = new PaperSize(210.Millimeters(), 297.Millimeters());
 
-                contenidoPDF = DesencriptarHtml(contenidoPDF);
+                contenidoPDF = ParametrosHelper.DesencriptarHtml(contenidoPDF);
 
                 string logoInacapBase64 = "";
                 string ruta = Server.MapPath("~/Img/foto_pdf.png");
@@ -74,20 +74,6 @@ namespace Web.Controllers
             {
                 return Content(ex.Message);
             }
-        }
-
-        public string DesencriptarHtml(string cadena)
-        {
-            if (!string.IsNullOrEmpty(cadena))
-            {
-                cadena = cadena.Replace("|amp;", "&");
-                cadena = cadena.Replace("|lt;", "<");
-                cadena = cadena.Replace("|gt;", ">");
-
-                cadena = Regex.Replace(cadena, "<!--.*?-->", String.Empty, RegexOptions.Singleline);   // Remover comentarios <!-- -->     
-            }
-
-            return cadena;
         }
 
         private string ObtenerEstilosReporte()

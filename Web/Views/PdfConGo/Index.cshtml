@@ -1,0 +1,135 @@
+﻿
+<div class="container mt-4">
+
+    <div class="card">
+        <div class="card-body">
+
+            <div class="row g-3">
+
+                <div class="col-md-4">
+                    <h4>Descarga de PDF con html y exe (Go)</h4> <br /><br />
+
+                    <button type="button" onclick="descargarPDF('carta')" class="btn btn-primary">Carta</button>
+
+                    <button type="button" onclick="descargarPDF('oficio')" class="btn btn-success">Oficio</button>
+
+                    <button type="button" onclick="descargarPDF('A4')" class="btn btn-primary">A4</button>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<script>
+
+    function descargarPDF(tipoPapel = "carta")
+    {
+        let arreglo = [
+            { producto: "Producto 0", descripcion: "Descripción 0" },
+            { producto: "Producto 1", descripcion: "Descripción 1" },
+            { producto: "Producto 2", descripcion: "Descripción 2" },
+            { producto: "Producto 3", descripcion: "Descripción 3" },
+            { producto: "Producto 4", descripcion: "Descripción 4" },
+            { producto: "Producto 5", descripcion: "Descripción 5" },
+            { producto: "Producto 6", descripcion: "Descripción 6" },
+            { producto: "Producto 7", descripcion: "Descripción 7" },
+            { producto: "Producto 8", descripcion: "Descripción 8" },
+            { producto: "Producto 9", descripcion: "Descripción 9" },
+            { producto: "Producto 10", descripcion: "Descripción 10" },
+            { producto: "Producto 11", descripcion: "Descripción 11" },
+            { producto: "Producto 12", descripcion: "Descripción 12" },
+            { producto: "Producto 13", descripcion: "Descripción 13" },
+            { producto: "Producto 14", descripcion: "Descripción 14" },
+            { producto: "Producto 15", descripcion: "Descripción 15" },
+            { producto: "Producto 16", descripcion: "Descripción 16" },
+            { producto: "Producto 17", descripcion: "Descripción 17" },
+            { producto: "Producto 18", descripcion: "Descripción 18" },
+            { producto: "Producto 19", descripcion: "Descripción 19" }
+        ];
+
+        let contenidoPDF = `
+        <br/><br />
+        <table class="tabla-info">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Descripción</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${arreglo.map(x => {
+                    return ` <tr>
+                        <td>${x.producto}</td>
+                        <td>${x.descripcion}</td>
+                    </tr>`;
+                })
+                .join("")}
+            </tbody>
+        </table>
+        `;
+
+        contenidoPDF = htmlEncoder(contenidoPDF);  // Encripta el html string, para que así el MVC lo reciba
+
+        let nombreArchivo = "PRUEBA_HOY";
+
+        console.log("Inicia la descarga del PDF");
+
+        fetch("@Url.Action("DescargarPdfConExe", "PdfConGo")", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ tipoPapel, contenidoPDF, nombreArchivo, esHorizontal: false })
+        })
+        .then(res =>
+        {
+            if (!res.ok)
+                throw Error(res.statusText);
+
+            const header = res.headers.get("Content-Disposition");
+            const contentType = res.headers.get("content-type");
+
+            if (contentType && contentType.includes("json"))  // Si la respuesta es un error
+            {
+                res.json().then(data => mostrarErroresRespuestaBackend(data));
+                return null;
+            }
+
+            const parts = header.split(";");
+            filename = parts[1].split("=")[1].replaceAll("\"", "");
+            return res.blob();
+        })
+        .then(blob =>
+        {
+            if (blob != null)
+            {
+                filename = decodeURI(filename);   // Decodifica tildes
+
+                //console.log("El filename es:", filename);
+                filename = filename.replaceAll("+", " ");    // Reemplaza el signo + por un espacio
+
+                var url = window.URL.createObjectURL(blob);
+                var a = document.createElement("a");
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            }
+        })
+        .catch(() => alert("Se encontró un error al descargar el archivo"))
+        .finally(() => {
+            console.log("Terminó la descarga del PDF")
+        });
+    }
+
+    function htmlEncoder(cadena)
+    {
+        cadena = cadena.replace(/&/g, '|amp;');  // Reeemplazar el &
+        cadena = cadena.replace(/</g, '|lt;');
+        cadena = cadena.replace(/>/g, '|gt;');
+        return cadena;
+    }
+
+</script>

@@ -1,0 +1,116 @@
+Instalar Go:
+
+Descargas el instalador desde la web oficial: https://go.dev/dl/
+Descargas y ejecutas el .msi (Para windows) → sigue un wizard muy simple
+Go se añade automáticamente al PATH
+
+Abres cmd o PowerShell y verificas con:
+go version
+
+Deberías ver algo como:
+go version go1.21.2 windows/amd64
+
+==============================================>>>>>
+2. Preparación del Proyecto Ejecuta estos comandos en orden para crear la carpeta y configurar el entorno 
+(esto evita errores de Git y bloqueos de red):
+
+cd "LA_RUTA_DE_RU_CARPETA"
+mkdir pdf-worker
+cd pdf-worker
+
+:: Forzar a Go a usar el servidor de Google y no Git directamente
+set GOPROXY=https://proxy.golang.org,direct
+set GO111MODULE=on
+set GIT_TERMINAL_PROMPT=0
+
+:: Inicializar y descargar librerías
+go mod init pdf-worker
+go get github.com/chromedp/chromedp@latest
+go get github.com/chromedp/cdproto@latest
+
+==============================================>>>>>
+
+3. Código Fuente (main.go):
+
+package main
+
+import (
+	"context"
+	"io/ioutil"
+	"os"
+	"strconv"
+
+	"github.com/chromedp/cdproto/page"
+	"github.com/chromedp/chromedp"
+)
+
+func main() {
+	// Valores por defecto
+	width := 8.5
+	height := 11.0
+	landscape := false
+	margin := 0.4 // Margen estándar de ~1cm
+
+	// Leer argumentos: ancho alto orientacion margen
+	if len(os.Args) >= 5 {
+		w, _ := strconv.ParseFloat(os.Args[1], 64)
+		h, _ := strconv.ParseFloat(os.Args[2], 64)
+		l, _ := strconv.ParseBool(os.Args[3])
+		m, _ := strconv.ParseFloat(os.Args[4], 64)
+		if w > 0 && h > 0 {
+			width = w
+			height = h
+			landscape = l
+			margin = m
+		}
+	}
+
+	htmlBytes, _ := ioutil.ReadAll(os.Stdin)
+
+	opts := append(chromedp.DefaultExecAllocatorOptions[:],
+		chromedp.NoSandbox,
+		chromedp.DisableGPU,
+	)
+
+	allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), opts...)
+	defer cancel()
+	ctx, cancel := chromedp.NewContext(allocCtx)
+	defer cancel()
+
+	var buf []byte
+	err := chromedp.Run(ctx,
+		chromedp.Navigate("about:blank"),
+		chromedp.ActionFunc(func(ctx context.Context) error {
+			frameTree, err := page.GetFrameTree().Do(ctx)
+			if err != nil {
+				return err
+			}
+			return page.SetDocumentContent(frameTree.Frame.ID, string(htmlBytes)).Do(ctx)
+		}),
+		chromedp.ActionFunc(func(ctx context.Context) error {
+			var err error
+			buf, _, err = page.PrintToPDF().
+				WithPrintBackground(true).
+				WithPaperWidth(width).
+				WithPaperHeight(height).
+				WithLandscape(landscape).
+				WithMarginTop(margin).    // Margen Superior
+				WithMarginBottom(margin). // Margen Inferior
+				WithMarginLeft(margin).   // Margen Izquierdo
+				WithMarginRight(margin).  // Margen Derecho
+				Do(ctx)
+			return err
+		}),
+	)
+
+	if err == nil && len(buf) > 0 {
+		os.Stdout.Write(buf)
+	}
+}
+
+==============================================>>>>>
+
+4. Compilación Final Ejecuta estos dos comandos para generar el ejecutable:
+
+go mod tidy
+go build -ldflags="-s -w -H=windowsgui" -o pdf-worker.exe
